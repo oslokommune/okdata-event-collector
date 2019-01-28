@@ -6,6 +6,8 @@ provider:
   name: aws
   runtime: python3.7
   region: eu-west-1
+  apiKeys:
+    - eventCollectorKeyDev
 
 
 functions:
@@ -19,3 +21,4 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: non-linux
+    documentation: ${file(serverless/documentation/documentation.yaml)}

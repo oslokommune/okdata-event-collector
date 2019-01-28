@@ -1,11 +1,11 @@
 handler: python/handler.post_event
 events:
   - http:
-    path: event/{datasetId}/{version}
-    method: post
-    parameters:
-      paths:
-        datasetId: true
-        version: true
-    documentation: ${file(serverless/documentation/postEvent.yaml)}
-    authorizer: ${file(serverless/kc-authorizer.yaml)}
+      path: event/{datasetId}/{version}
+      method: post
+      private: true
+      parameters:
+        paths:
+          datasetId: true
+          version: true
+      documentation: ${file(serverless/documentation/postEvent.yaml)}
