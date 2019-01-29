@@ -10,7 +10,7 @@ provider:
   deploymentBucket:
     name: ok-origo-dataplatform-config-${self:provider.stage}
     serverSideEncryption: AES256
-  deploymentPrefix: deploy
+  deploymentPrefix: deploy/event-collector
   apiKeys:
     - eventCollectorKeyDev
 
