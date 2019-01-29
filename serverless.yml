@@ -1,0 +1,29 @@
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+service: event-collector
+
+provider:
+  name: aws
+  runtime: python3.7
+  region: ${opt:region, 'eu-west-1'}
+  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: ok-origo-dataplatform-config-${self:provider.stage}
+    serverSideEncryption: AES256
+  deploymentPrefix: deploy
+  apiKeys:
+    - eventCollectorKeyDev
+
+
+functions:
+  postEvent: ${file(serverless/functions/postEvent.yaml)}
+
+
+plugins:
+  - serverless-python-requirements
+  - serverless-aws-documentation
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+    documentation: ${file(serverless/documentation/documentation.yaml)}

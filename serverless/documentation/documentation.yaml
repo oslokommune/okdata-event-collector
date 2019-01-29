@@ -1,0 +1,44 @@
+version: 0.1.0
+summary: Api for putting records on a kinesis firehose delivery stream
+description: A todo API documented with OpenAPI specification
+models:
+  -
+    name: postEventRequest
+    description: An arbitrary json
+    contentType: application/json
+    schema:
+      type: object
+  -
+    name: postEventResponse
+    description: Response on success
+    contentType: application/json
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+  -
+    name: notFoundResponse
+    description: Dataset with specified id and version does not exist
+    contentType: application/json
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message
+
+  -
+    name: unauthorizedError
+    description: Unauthorized
+    contentType: application/json
+    schema:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - message

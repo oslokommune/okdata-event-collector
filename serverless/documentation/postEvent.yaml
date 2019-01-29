@@ -1,0 +1,28 @@
+summary: Puts a record on a firehose data delivery stream
+description: Puts a record on a firehose data delivery stream
+pathParams:
+  -
+    name: datasetId
+    description: Identifier for destination dataset
+    required: true
+  -
+    name: version
+    description: Version for destination dataset
+    required: true
+requestBody:
+  description: Arbitrary json structure containing event data
+requestModels:
+  "application/json": postEventRequest
+methodResponses:
+  -
+    statusCode: '202'
+    responseModels:
+      "application/json": postEventResponse
+  -
+    statusCode: '404'
+    responseModels:
+      "application/json": notFoundResponse
+  -
+    statusCode: '401'
+    responseModels:
+      "application/json": unauthorizedError
