@@ -5,7 +5,12 @@ service: event-collector
 provider:
   name: aws
   runtime: python3.7
-  region: eu-west-1
+  region: ${opt:region, 'eu-west-1'}
+  stage: ${opt:stage, 'dev'}
+  deploymentBucket:
+    name: ok-origo-dataplatform-config-${self:provider.stage}
+    serverSideEncryption: AES256
+  deploymentPrefix: deploy
   apiKeys:
     - eventCollectorKeyDev
 
