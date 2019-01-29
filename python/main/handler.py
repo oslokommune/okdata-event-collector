@@ -11,6 +11,7 @@ def post_event(event, context, retries = 3):
     stream_name=f'incoming.{dataset_id}.{dataset_version}'
     put_records_response = put_records_to_kinesis(record_data_list, stream_name)
 
+    # Applying retry-strategy: https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-sdk.html
     while put_records_response['FailedRecordCount'] > 0 & retries > 0:
         failed_record_list = []
         for i in range(record_data_list.size()):
@@ -19,7 +20,6 @@ def post_event(event, context, retries = 3):
         record_data_list = failed_record_list
         put_records_response = put_records_to_kinesis(record_data_list, stream_name)
         retries -= 1
-
 
 
 def put_records_to_kinesis(record_data_list, stream_name):
@@ -33,8 +33,8 @@ def put_records_to_kinesis(record_data_list, stream_name):
 
 def get_metadata(dataset_id, dataset_version):
     if (dataset_id, dataset_version) == ('1234', '4321'):
-        return True
-    return False
+        return False
+    return True
 
 
 def event_to_record_data_list(event):
@@ -51,10 +51,11 @@ def event_to_record_data_list(event):
 
     return record_data_list
 
-def accepted_response():
+
+def accepted_response(failed_record_count):
     lambda_proxy_response = {
         'statusCode': 202,
-        'body': json.dumps({'message': 'Accepted'})
+        'body': json.dumps({'failedRecordCount': failed_record_count})
     }
     return lambda_proxy_response
 
