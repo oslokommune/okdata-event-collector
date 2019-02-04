@@ -21,6 +21,8 @@ def post_event(event, context, retries = 3):
         put_records_response = put_records_to_kinesis(record_data_list, stream_name)
         retries -= 1
 
+    return accepted_response(put_records_response['FailedRecordCount'])
+
 
 def put_records_to_kinesis(record_data_list, stream_name):
     kinesis_client = boto3.client('kinesis', region_name='eu-west-1')
