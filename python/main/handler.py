@@ -9,10 +9,10 @@ def post_event(event, context, retries=3):
 
     record_data_list = event_to_record_data_list(event)
     stream_name = f'incoming.{dataset_id}.{dataset_version}'
-    put_records_response, failed_record_list = put_records_to_kinesis(record_data_list, stream_name, retries)
+    kinesis_response, failed_record_list = put_records_to_kinesis(record_data_list, stream_name, retries)
 
-    if put_records_response['FailedRecordCount'] > 0:
-        return failed_records_response(put_records_response, )
+    if len(failed_record_list) > 0:
+        return failed_records_response(failed_record_list)
 
     return ok_response()
 

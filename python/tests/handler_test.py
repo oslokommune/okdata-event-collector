@@ -1,4 +1,5 @@
 import unittest
+from mock import patch
 import boto3
 import json
 
@@ -44,6 +45,20 @@ class Tester(unittest.TestCase):
         post_event_response = handler.post_event(post_event_data.event, None)
 
         self.assertDictEqual(post_event_response, post_event_data.ok_response)
+
+    @patch('python.main.handler.put_records_to_kinesis')
+    def test_post_event_failed_records(self, test_patch):
+        test_patch.return_value = ('', [1,2,3])
+        post_event_response = handler.post_event(post_event_data.event, None)
+        expected_response = {
+            'statusCode': 500,
+            'body': '{"message": "Request failed for some elements", "failedElements": [1, 2, 3]}'
+        }
+        self.assertDictEqual(post_event_response, expected_response)
+
+    def test_post_event_not_found(self):
+        post_event_response = handler.post_event(post_event_data.event_not_found, None)
+        self.assertDictEqual(post_event_response, post_event_data.not_found_response)
 
 
 if __name__ == '__main__':

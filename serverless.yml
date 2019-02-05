@@ -13,6 +13,15 @@ provider:
   deploymentPrefix: deploy/event-collector
   apiKeys:
     - eventCollectorKeyDev
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - kinesis:putRecords
+      Resource: 'arn:aws:kinesis:eu-west-1:***REMOVED***:stream/incoming.*'
+    - Effect: Allow
+      Action:
+        - lambda:InvokeFunction
+      Resource: 'arn:aws:lambda:eu-west-1:***REMOVED***:function:keycloak-authorizer-dev-authenticate'
 
 
 functions:
