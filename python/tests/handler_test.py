@@ -5,6 +5,7 @@ import json
 import python.main.handler as handler
 import python.tests.test_data.event_to_record_data as event_to_record_data
 import python.tests.test_data.get_failed_records_data as get_failed_records_data
+import python.tests.test_data.post_event_data as post_event_data
 from moto import mock_kinesis
 
 
@@ -34,6 +35,15 @@ class Tester(unittest.TestCase):
 
         assert put_records_response[0]['FailedRecordCount'] == 0
         assert put_records_response[1] == []
+
+    @mock_kinesis
+    def test_post_event(self):
+        conn = boto3.client('kinesis', region_name='eu-west-1')
+        stream_name = 'incoming.d123.v123'
+        conn.create_stream(StreamName=stream_name, ShardCount=1)
+        post_event_response = handler.post_event(post_event_data.event, None)
+
+        self.assertDictEqual(post_event_response, post_event_data.ok_response)
 
 
 if __name__ == '__main__':
