@@ -20,7 +20,7 @@ put_records_response = {
     ]
 }
 
-record_data_list = [
+record_list = [
     {
         'PartitionKey': 'aa-bb',
         'Data': '{"data": {"key00": "value00", "key01": "value01"}, "datasetId": "d123", "version": "v123"}'

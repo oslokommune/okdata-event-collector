@@ -15,7 +15,7 @@ requestModels:
   "application/json": postEventRequest
 methodResponses:
   -
-    statusCode: '202'
+    statusCode: '200'
     responseModels:
       "application/json": postEventResponse
   -
@@ -23,6 +23,6 @@ methodResponses:
     responseModels:
       "application/json": notFoundResponse
   -
-    statusCode: '401'
+    statusCode: '403'
     responseModels:
-      "application/json": unauthorizedError
+      "application/json": forbiddenError

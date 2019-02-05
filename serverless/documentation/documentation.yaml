@@ -32,8 +32,8 @@ models:
         - message
 
   -
-    name: unauthorizedError
-    description: Unauthorized
+    name: forbiddenError
+    description: Forbidden
     contentType: application/json
     schema:
       type: object
@@ -42,3 +42,20 @@ models:
           type: string
       required:
         - message
+
+  -
+    name: failedRecordsError
+    description: Failed to process some or all of the elements in the request body.
+    contentType: application/json
+    schema:
+      type: object
+      properties:
+        failedElements:
+          type: array
+          items:
+            type: object
+        message:
+          type: string
+      required:
+        - message
+        - failedElements

@@ -11,14 +11,14 @@ from moto import mock_kinesis
 
 
 class Tester(unittest.TestCase):
-    def test_event_to_record_data_list(self):
+    def test_event_to_record_list(self):
         event = event_to_record_data.input_event
-        record_data_list = handler.event_to_record_data_list(event)
-        self.assertListEqual(record_data_list, event_to_record_data.expected)
+        record_list = handler.event_to_record_list(event)
+        self.assertListEqual(record_list, event_to_record_data.expected)
 
     def test_get_failed_records(self):
         failed_records_list = handler.get_failed_records(
-            get_failed_records_data.put_records_response, get_failed_records_data.record_data_list)
+            get_failed_records_data.put_records_response, get_failed_records_data.record_list)
         self.assertListEqual(failed_records_list, get_failed_records_data.expected)
 
     @mock_kinesis
@@ -47,12 +47,12 @@ class Tester(unittest.TestCase):
         self.assertDictEqual(post_event_response, post_event_data.ok_response)
 
     @patch('python.main.handler.put_records_to_kinesis')
-    def test_post_event_failed_records(self, test_patch):
-        test_patch.return_value = ('', [1,2,3])
+    def test_post_event_failed_records(self, put_records_to_kinesis_patch):
+        put_records_to_kinesis_patch.return_value = ('', post_event_data.failed_record_list)
         post_event_response = handler.post_event(post_event_data.event, None)
         expected_response = {
             'statusCode': 500,
-            'body': '{"message": "Request failed for some elements", "failedElements": [1, 2, 3]}'
+            'body': '{"message": "Request failed for some elements", "failedElements": [{"key00": "value00"}, {"key10": "value10"}]}'
         }
         self.assertDictEqual(post_event_response, expected_response)
 
