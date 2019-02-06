@@ -3,10 +3,10 @@ from mock import patch
 import boto3
 import json
 
-import python.main.handler as handler
-import python.tests.test_data.event_to_record_data as event_to_record_data
-import python.tests.test_data.get_failed_records_data as get_failed_records_data
-import python.tests.test_data.post_event_data as post_event_data
+import src.main.handler as handler
+import src.tests.test_data.event_to_record_data as event_to_record_data
+import src.tests.test_data.get_failed_records_data as get_failed_records_data
+import src.tests.test_data.post_event_data as post_event_data
 from moto import mock_kinesis
 
 
@@ -46,7 +46,7 @@ class Tester(unittest.TestCase):
 
         self.assertDictEqual(post_event_response, post_event_data.ok_response)
 
-    @patch('python.main.handler.put_records_to_kinesis')
+    @patch('src.main.handler.put_records_to_kinesis')
     def test_post_event_failed_records(self, put_records_to_kinesis_patch):
         put_records_to_kinesis_patch.return_value = ('', post_event_data.failed_record_list)
         post_event_response = handler.post_event(post_event_data.event, None)
