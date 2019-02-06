@@ -53,16 +53,14 @@ def put_records_to_kinesis(record_list, stream_name, retries):
     )
 
     # Applying retry-strategy: https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-sdk.html
-    while put_records_response['FailedRecordCount'] > 0 & retries > 0:
-
-        record_list = get_failed_records(put_records_response, record_list)
-
-        put_records_response = kinesis_client.put_records(
-            StreamName=stream_name,
-            Records=record_list
-        )
-        retries -= 1
-    return put_records_response, get_failed_records(put_records_response, record_list)
+    if put_records_response['FailedRecordCount'] > 0:
+        failed_record_list = get_failed_records(put_records_response, record_list)
+        if retries > 0:
+            return put_records_to_kinesis(failed_record_list, stream_name, retries - 1)
+        else:
+            return put_records_response, failed_record_list
+    else:
+        return put_records_response, []
 
 
 def get_failed_records(put_records_response, record_list):
