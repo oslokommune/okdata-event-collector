@@ -1,5 +1,19 @@
 import json
 import boto3
+import logging
+import traceback
+
+from json.decoder import JSONDecodeError
+from botocore.client import ClientError
+from jsonschema import validate, ValidationError
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+request_schema = None
+
+with open('serverless/documentation/schemas/postEventRequest.json') as f:
+    request_schema = json.loads(f.read())
 
 
 def post_event(event, context, retries=3):
@@ -7,9 +21,23 @@ def post_event(event, context, retries=3):
     if not get_metadata(dataset_id, dataset_version):
         return not_found_response(dataset_id, dataset_version)
 
-    record_list = event_to_record_list(event)
+    try:
+        validate(json.loads(event['body']), request_schema)
+        record_list = event_to_record_list(event)
+    except JSONDecodeError as e:
+        logger.exception(f'Body is not a valid JSON document: {e}')
+        return error_response(400, 'Body is not a valid JSON document')
+    except ValidationError as e:
+        logger.exception(f'JSON document does not conform to the given schema: {e}')
+        return error_response(400, 'JSON document does not conform to the given schema')
+
     stream_name = f'incoming.{dataset_id}.{dataset_version}'
-    kinesis_response, failed_record_list = put_records_to_kinesis(record_list, stream_name, retries)
+
+    try:
+        kinesis_response, failed_record_list = put_records_to_kinesis(record_list, stream_name, retries)
+    except ClientError:
+        logger.error(traceback.format_exc())
+        return error_response(500, 'Internal server error')
 
     if len(failed_record_list) > 0:
         return failed_elements_response(failed_record_list)
@@ -55,6 +83,7 @@ def event_to_record_list(event):
     record_list = []
 
     for element in json.loads(event['body']):
+        json.loads(json.dumps(element))
         record_data = {'data': element, 'datasetId': event['pathParameters']['datasetId'],
                        'version': event['pathParameters']['version']}
         record_list.append(
@@ -86,12 +115,15 @@ def ok_response():
     }
     return lambda_proxy_response
 
+def error_response(status, message):
+    return {
+        'statusCode': status,
+        'body': json.dumps({'message': message})
+    }
 
 def not_found_response(dataset_id, dataset_version):
     return {
         'statusCode': 404,
-        'isBase64Encoded': False,
-        'headers': {},
         'body': json.dumps({'message': f'Dataset with id:{dataset_id} and version:{dataset_version} does not exist'})
     }
 

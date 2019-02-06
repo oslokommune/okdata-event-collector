@@ -60,6 +60,25 @@ class Tester(unittest.TestCase):
         post_event_response = handler.post_event(post_event_data.event_not_found, None)
         self.assertDictEqual(post_event_response, post_event_data.not_found_response)
 
+    @mock_kinesis
+    def test_post_event_client_error(self):
+        conn = boto3.client('kinesis', region_name='eu-west-1')
+        stream_name = 'incoming.d123.v123'
+        conn.create_stream(StreamName=stream_name, ShardCount=1)
+        post_event_response = handler.post_event(post_event_data.client_error_event, None)
+        self.assertDictEqual(post_event_response, post_event_data.error_response)
+
+    def test_post_event_decode_error(self):
+        post_event_response = handler.post_event(post_event_data.decode_error_event, None)
+        self.assertDictEqual(post_event_response, post_event_data.decode_error_response)
+
+    def test_post_event_validation_error(self):
+        post_event_response_1 = handler.post_event(post_event_data.validation_error_event_1, None)
+        post_event_response_2 = handler.post_event(post_event_data.validation_error_event_2, None)
+        self.assertDictEqual(post_event_response_1, post_event_data.validation_error_response)
+        self.assertDictEqual(post_event_response_2, post_event_data.validation_error_response)
+
+
 
 if __name__ == '__main__':
     unittest.main()

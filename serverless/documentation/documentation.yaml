@@ -6,8 +6,7 @@ models:
     name: postEventRequest
     description: An arbitrary json
     contentType: application/json
-    schema:
-      type: object
+    schema: ${file(serverless/documentation/schemas/postEventRequest.json)}
   -
     name: postEventResponse
     description: Response on success
