@@ -2,6 +2,7 @@ import json
 import boto3
 import logging
 import traceback
+import uuid
 
 from json.decoder import JSONDecodeError
 from botocore.client import ClientError
@@ -87,10 +88,10 @@ def event_to_record_list(event):
         record_list.append(
             {
                 'Data': json.dumps(record_data),
-                'PartitionKey': 'aa-bb'
+                'PartitionKey': str(uuid.uuid4())
             }
         )
-
+    print(record_list)
     return record_list
 
 

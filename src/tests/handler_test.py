@@ -14,7 +14,10 @@ class Tester(unittest.TestCase):
     def test_event_to_record_list(self):
         event = event_to_record_data.input_event
         record_list = handler.event_to_record_list(event)
-        self.assertListEqual(record_list, event_to_record_data.expected)
+
+        pairs = zip(record_list, event_to_record_data.expected)
+
+        assert not any(x['Data'] != y['Data'] for x, y in pairs)
 
     def test_get_failed_records(self):
         failed_records_list = handler.get_failed_records(
