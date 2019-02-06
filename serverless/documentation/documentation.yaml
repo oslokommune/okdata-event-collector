@@ -11,50 +11,33 @@ models:
     name: postEventResponse
     description: Response on success
     contentType: application/json
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-      required:
-        - message
+    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
   -
     name: notFoundResponse
     description: Dataset with specified id and version does not exist
     contentType: application/json
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-      required:
-        - message
+    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
 
   -
     name: forbiddenError
     description: Forbidden
     contentType: application/json
-    schema:
-      type: object
-      properties:
-        message:
-          type: string
-      required:
-        - message
+    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
 
   -
-    name: failedRecordsError
+    name: badRequestError
+    description: Invalid request body
+    contentType: application/json
+    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
+
+  -
+    name: serverError
+    description: Internal server error
+    contentType: application/json
+    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
+
+  -
+    name: failedElementsError
     description: Failed to process some or all of the elements in the request body.
     contentType: application/json
-    schema:
-      type: object
-      properties:
-        failedElements:
-          type: array
-          items:
-            type: object
-        message:
-          type: string
-      required:
-        - message
-        - failedElements
+    schema: ${file(serverless/documentation/schemas/postEventFailedElements.json)}

@@ -19,10 +19,22 @@ methodResponses:
     responseModels:
       "application/json": postEventResponse
   -
-    statusCode: '404'
+    statusCode: '400'
     responseModels:
-      "application/json": notFoundResponse
+      "application/json": badRequestError
   -
     statusCode: '403'
     responseModels:
       "application/json": forbiddenError
+  -
+    statusCode: '404'
+    responseModels:
+      "application/json": notFoundResponse
+  -
+    statusCode: '500'
+    responseModels:
+      "application/json": serverError
+  -
+    statusCode: '500'
+    responseModels:
+      "application/json": failedElementsError

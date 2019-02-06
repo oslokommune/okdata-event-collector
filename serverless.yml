@@ -35,4 +35,4 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: non-linux
-    documentation: ${file(serverless/documentation/documentation.yaml)}
+  documentation: ${file(serverless/documentation/documentation.yaml)}

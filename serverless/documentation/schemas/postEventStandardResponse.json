@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "title": "Post Event Reqsponse",
+  "properties": {
+    "message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
