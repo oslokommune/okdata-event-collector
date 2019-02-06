@@ -1,5 +1,5 @@
-summary: Puts a record on a firehose data delivery stream
-description: Puts a record on a firehose data delivery stream
+summary: Takes a list of objects and puts them on a data stream.
+description: Takes a list of objects and puts them on a data stream.
 pathParams:
   -
     name: datasetId
@@ -17,24 +17,20 @@ methodResponses:
   -
     statusCode: '200'
     responseModels:
-      "application/json": postEventResponse
+      "application/json": postEventStandardResponse
   -
     statusCode: '400'
     responseModels:
-      "application/json": badRequestError
+      "application/json": postEventStandardResponse
   -
     statusCode: '403'
     responseModels:
-      "application/json": forbiddenError
+      "application/json": postEventStandardResponse
   -
     statusCode: '404'
     responseModels:
-      "application/json": notFoundResponse
+      "application/json": postEventStandardResponse
   -
     statusCode: '500'
     responseModels:
       "application/json": serverError
-  -
-    statusCode: '500'
-    responseModels:
-      "application/json": failedElementsError

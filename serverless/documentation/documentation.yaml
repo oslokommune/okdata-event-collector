@@ -1,43 +1,19 @@
-version: 0.1.0
-summary: Api for putting records on a kinesis firehose delivery stream
-description: A todo API documented with OpenAPI specification
+version: 0.3.0
+summary: Api for uploading data to the data platform.
+description: Entrypoint to the data platform.
 models:
   -
     name: postEventRequest
-    description: An arbitrary json
+    description: An arbitrary json.
     contentType: application/json
     schema: ${file(serverless/documentation/schemas/postEventRequest.json)}
   -
-    name: postEventResponse
-    description: Response on success
+    name: postEventStandardResponse
+    description: Response on success.
     contentType: application/json
     schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
-  -
-    name: notFoundResponse
-    description: Dataset with specified id and version does not exist
-    contentType: application/json
-    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
-
-  -
-    name: forbiddenError
-    description: Forbidden
-    contentType: application/json
-    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
-
-  -
-    name: badRequestError
-    description: Invalid request body
-    contentType: application/json
-    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
-
   -
     name: serverError
-    description: Internal server error
-    contentType: application/json
-    schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}
-
-  -
-    name: failedElementsError
-    description: Failed to process some or all of the elements in the request body.
+    description: Internal server error.
     contentType: application/json
     schema: ${file(serverless/documentation/schemas/postEventFailedElements.json)}

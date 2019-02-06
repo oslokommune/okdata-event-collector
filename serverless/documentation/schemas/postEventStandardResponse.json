@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Post Event Reqsponse",
+  "title": "Post Event Standard Response",
   "properties": {
     "message": {
       "type": "string"
