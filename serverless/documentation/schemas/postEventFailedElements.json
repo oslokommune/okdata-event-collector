@@ -1,0 +1,18 @@
+{
+  "type": "object",
+  "title": "Post Event Failed Elements Responses",
+  "properties": {
+    "message": {
+      "type": "string"
+    },
+    "failedElements": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": [
+    "message"
+  ]
+}

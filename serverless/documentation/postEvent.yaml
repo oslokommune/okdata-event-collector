@@ -1,5 +1,5 @@
-summary: Puts a record on a firehose data delivery stream
-description: Puts a record on a firehose data delivery stream
+summary: Takes a list of events and puts them on a data stream.
+description: Takes a list of events and puts them on a data stream.
 pathParams:
   -
     name: datasetId
@@ -10,19 +10,27 @@ pathParams:
     description: Version for destination dataset
     required: true
 requestBody:
-  description: Arbitrary json structure containing event data
+  description: Array of json objects.
 requestModels:
   "application/json": postEventRequest
 methodResponses:
   -
-    statusCode: '202'
+    statusCode: '200'
     responseModels:
-      "application/json": postEventResponse
+      "application/json": postEventStandardResponse
+  -
+    statusCode: '400'
+    responseModels:
+      "application/json": postEventStandardResponse
+  -
+    statusCode: '403'
+    responseModels:
+      "application/json": postEventStandardResponse
   -
     statusCode: '404'
     responseModels:
-      "application/json": notFoundResponse
+      "application/json": postEventStandardResponse
   -
-    statusCode: '401'
+    statusCode: '500'
     responseModels:
-      "application/json": unauthorizedError
+      "application/json": serverError

@@ -1,4 +1,4 @@
-handler: python/handler.post_event
+handler: src/main/handler.post_event
 events:
   - http:
       path: event/{datasetId}/{version}

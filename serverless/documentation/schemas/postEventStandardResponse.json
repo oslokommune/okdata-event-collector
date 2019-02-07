@@ -1,0 +1,12 @@
+{
+  "type": "object",
+  "title": "Post Event Standard Response",
+  "properties": {
+    "message": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "message"
+  ]
+}
