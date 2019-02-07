@@ -1,94 +1,102 @@
----
-swagger: "2.0"
+openapi: "3.0.1"
 info:
-  version: "2019-02-06T14:47:51Z"
   title: "dev-event-collector"
-host: "nkf8mj7skg.execute-api.eu-west-1.amazonaws.com"
-basePath: "/dev"
-schemes:
-- "https"
+  version: "2019-02-07T12:53:33Z"
+servers:
+- url: "https://okk3jtkvdi.execute-api.eu-west-1.amazonaws.com/{basePath}"
+  variables:
+    basePath:
+      default: "/dev"
 paths:
   /event/{datasetId}/{version}:
     post:
-      summary: "Takes a list of objects and puts them on a data stream."
-      description: "Takes a list of objects and puts them on a data stream."
-      consumes:
-      - "application/json"
-      produces:
-      - "application/json"
+      summary: "Takes a list of events and puts them on a data stream."
+      description: "Takes a list of events and puts them on a data stream."
       parameters:
       - name: "version"
         in: "path"
         description: "Version for destination dataset"
         required: true
-        type: "string"
+        schema:
+          type: "string"
       - name: "datasetId"
         in: "path"
         description: "Identifier for destination dataset"
         required: true
-        type: "string"
-      - in: "body"
-        name: "postEventRequest"
-        description: "Arbitrary json structure containing event data"
-        required: true
         schema:
-          $ref: "#/definitions/postEventRequest"
+          type: "string"
+      requestBody:
+        description: "Array of json objects."
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/postEventRequest"
+        required: true
       responses:
-        200:
-          description: "200 response"
-          schema:
-            $ref: "#/definitions/postEventStandardResponse"
-        400:
-          description: "400 response"
-          schema:
-            $ref: "#/definitions/postEventStandardResponse"
-        500:
-          description: "500 response"
-          schema:
-            $ref: "#/definitions/serverError"
-        403:
-          description: "403 response"
-          schema:
-            $ref: "#/definitions/postEventStandardResponse"
         404:
           description: "404 response"
-          schema:
-            $ref: "#/definitions/postEventStandardResponse"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/postEventStandardResponse"
+        200:
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/postEventStandardResponse"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/postEventStandardResponse"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/serverError"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/postEventStandardResponse"
       security:
       - api_key: []
-securityDefinitions:
-  api_key:
-    type: "apiKey"
-    name: "x-api-key"
-    in: "header"
-definitions:
-  postEventRequest:
-    title: "Post Event Request"
-    type: "array"
-    description: "An arbitrary json."
-    items:
+components:
+  schemas:
+    postEventRequest:
+      title: "Post Event Request"
+      type: "array"
+      description: "An arbitrary json."
+      items:
+        type: "object"
+    postEventStandardResponse:
+      title: "Post Event Standard Response"
+      required:
+      - "message"
       type: "object"
-      properties: {}
-  postEventStandardResponse:
-    type: "object"
-    required:
-    - "message"
-    properties:
-      message:
-        type: "string"
-    title: "Post Event Standard Response"
-    description: "Response on success."
-  serverError:
-    type: "object"
-    required:
-    - "message"
-    properties:
-      failedElements:
-        type: "array"
-        items:
-          type: "object"
-          properties: {}
-      message:
-        type: "string"
-    title: "Post Event Failed Elements Responses"
-    description: "Internal server error."
+      properties:
+        message:
+          type: "string"
+      description: "Response on success."
+    serverError:
+      title: "Post Event Failed Elements Responses"
+      required:
+      - "message"
+      type: "object"
+      properties:
+        failedElements:
+          type: "array"
+          items:
+            type: "object"
+        message:
+          type: "string"
+      description: "Internal server error."
+  securitySchemes:
+    api_key:
+      type: "apiKey"
+      name: "x-api-key"
+      in: "header"

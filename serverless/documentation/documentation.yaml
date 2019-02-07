@@ -1,5 +1,5 @@
-version: 0.3.0
-summary: Api for uploading data to the data platform.
+version: 0.4.0
+summary: Api for sending events to the data platform.
 description: Entrypoint to the data platform.
 models:
   -

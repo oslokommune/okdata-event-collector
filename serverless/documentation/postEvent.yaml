@@ -1,5 +1,5 @@
-summary: Takes a list of objects and puts them on a data stream.
-description: Takes a list of objects and puts them on a data stream.
+summary: Takes a list of events and puts them on a data stream.
+description: Takes a list of events and puts them on a data stream.
 pathParams:
   -
     name: datasetId
