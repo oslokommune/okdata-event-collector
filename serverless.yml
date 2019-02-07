@@ -27,6 +27,11 @@ provider:
 functions:
   postEvent: ${file(serverless/functions/postEvent.yaml)}
 
+package:
+  exclude:
+    - "**/*"
+  include:
+    - "src/main/*.py"
 
 plugins:
   - serverless-python-requirements

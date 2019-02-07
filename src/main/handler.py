@@ -91,7 +91,7 @@ def event_to_record_list(event):
                 'PartitionKey': str(uuid.uuid4())
             }
         )
-        
+
     return record_list
 
 
