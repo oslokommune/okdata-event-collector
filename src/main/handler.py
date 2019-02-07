@@ -32,7 +32,7 @@ def post_event(event, context, retries=3):
         logger.exception(f'JSON document does not conform to the given schema: {e}')
         return error_response(400, 'JSON document does not conform to the given schema')
 
-    stream_name = f'incoming.{dataset_id}.{dataset_version}'
+    stream_name = f'green.{dataset_id}.incoming.{dataset_version}.json'
 
     try:
         kinesis_response, failed_record_list = put_records_to_kinesis(record_list, stream_name, retries)
@@ -91,7 +91,7 @@ def event_to_record_list(event):
                 'PartitionKey': str(uuid.uuid4())
             }
         )
-    print(record_list)
+        
     return record_list
 
 

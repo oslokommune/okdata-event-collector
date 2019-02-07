@@ -43,7 +43,7 @@ class Tester(unittest.TestCase):
     @mock_kinesis
     def test_post_event(self):
         conn = boto3.client('kinesis', region_name='eu-west-1')
-        stream_name = 'incoming.d123.v123'
+        stream_name = 'green.d123.incoming.v123.json'
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_event(post_event_data.event, None)
 
@@ -66,7 +66,7 @@ class Tester(unittest.TestCase):
     @mock_kinesis
     def test_post_event_client_error(self):
         conn = boto3.client('kinesis', region_name='eu-west-1')
-        stream_name = 'incoming.d123.v123'
+        stream_name = 'green.d123.incoming.v123.json'
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_event(post_event_data.client_error_event, None)
         self.assertDictEqual(post_event_response, post_event_data.error_response)
