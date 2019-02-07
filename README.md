@@ -6,7 +6,11 @@ Lambda functions to put a list of records on a kinesis stream.
 ## Setup
 
 1. [Install Serverless Framework](https://serverless.com/framework/docs/getting-started/)
-2. Install plugins: `sls plugin install -n serverless-python-requirements`
+2. Install plugins: 
+```
+sls plugin install -n serverless-python-requirements
+sls plugin install -n serverless-aws-documentation
+```
 
 ## Running tests
 
