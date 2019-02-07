@@ -10,7 +10,7 @@ pathParams:
     description: Version for destination dataset
     required: true
 requestBody:
-  description: Arbitrary json structure containing event data
+  description: Array of json objects.
 requestModels:
   "application/json": postEventRequest
 methodResponses:

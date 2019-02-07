@@ -4,6 +4,10 @@ service: event-collector
 
 provider:
   name: aws
+  apiKeys:
+    - ${self:provider.stage}-eventCollectorApiKey
+  apiGateway:
+    apiKeySourceType: HEADER
   runtime: python3.7
   region: ${opt:region, 'eu-west-1'}
   stage: ${opt:stage, 'dev'}
@@ -11,13 +15,11 @@ provider:
     name: ok-origo-dataplatform-config-${self:provider.stage}
     serverSideEncryption: AES256
   deploymentPrefix: deploy
-  apiKeys:
-    - eventCollectorKeyDev
   iamRoleStatements:
     - Effect: Allow
       Action:
         - kinesis:putRecords
-      Resource: 'arn:aws:kinesis:eu-west-1:***REMOVED***:stream/incoming.*'
+      Resource: 'arn:aws:kinesis:eu-west-1:***REMOVED***:stream/green.*.incoming.*'
     - Effect: Allow
       Action:
         - lambda:InvokeFunction
@@ -32,6 +34,7 @@ package:
     - "**/*"
   include:
     - "src/main/*.py"
+    - "serverless/documentation/schemas/*.json"
 
 plugins:
   - serverless-python-requirements
