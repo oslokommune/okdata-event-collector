@@ -15,15 +15,12 @@ provider:
     name: ok-origo-dataplatform-config-${self:provider.stage}
     serverSideEncryption: AES256
   deploymentPrefix: deploy
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - kinesis:putRecords
-      Resource: 'arn:aws:kinesis:eu-west-1:***REMOVED***:stream/green.*.incoming.*'
-    - Effect: Allow
-      Action:
-        - lambda:InvokeFunction
-      Resource: 'arn:aws:lambda:eu-west-1:***REMOVED***:function:keycloak-authorizer-dev-authenticate'
+  iamManagedPolicies:
+    - Fn::Join:
+        - ':'
+        - - 'arn:aws:iam:'
+          - Ref: AWS::AccountId
+          - 'policy/event-collector-policy'
 
 
 functions:
