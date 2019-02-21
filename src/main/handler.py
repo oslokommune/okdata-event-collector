@@ -23,8 +23,9 @@ def post_events(event, context, retries=3):
         return not_found_response(dataset_id, dataset_version)
 
     try:
-        validate(json.loads(event['body']), post_events_request_schema)
-        record_list = event_to_record_list(event)
+        event_body = extract_event_body(event)
+        validate(event_body, post_events_request_schema)
+        record_list = event_to_record_list(event_body)
     except JSONDecodeError as e:
         logger.exception(f'Body is not a valid JSON document: {e}')
         return error_response(400, 'Body is not a valid JSON document')
@@ -45,6 +46,13 @@ def post_events(event, context, retries=3):
 
     return ok_response()
 
+
+def extract_event_body(event):
+    body = json.loads(event['body'])
+    if type(body) != list:
+        return [body]
+    else:
+        return body
 
 def put_records_to_kinesis(record_list, stream_name, retries):
     kinesis_client = boto3.client('kinesis', region_name='eu-west-1')
@@ -78,16 +86,13 @@ def get_metadata(dataset_id, dataset_version):
     return True
 
 
-def event_to_record_list(event):
+def event_to_record_list(event_body):
     record_list = []
 
-    for element in json.loads(event['body']):
-        json.loads(json.dumps(element))
-        record_data = {'data': element, 'datasetId': event['pathParameters']['datasetId'],
-                       'version': event['pathParameters']['version']}
+    for element in event_body:
         record_list.append(
             {
-                'Data': json.dumps(record_data),
+                'Data': json.dumps(element),
                 'PartitionKey': str(uuid.uuid4())
             }
         )
@@ -128,5 +133,5 @@ def not_found_response(dataset_id, dataset_version):
 
 
 def extract_record_data(record):
-    return json.loads(record['Data'])['data']
+    return json.loads(record['Data'])
 
