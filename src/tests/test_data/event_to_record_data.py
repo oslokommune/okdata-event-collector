@@ -1,9 +1,3 @@
-import json
-
-event_path_params = {
-    'datasetId': 'd123',
-    'version': 'v123'
-}
 
 event_body = [
     {

@@ -1,14 +1,71 @@
 openapi: "3.0.1"
 info:
   title: "dev-event-collector"
-  version: "2019-02-07T12:53:33Z"
+  version: "2019-02-21T14:56:42Z"
 servers:
-- url: "https://okk3jtkvdi.execute-api.eu-west-1.amazonaws.com/{basePath}"
+- url: "https://l2hhccv0ij.execute-api.eu-west-1.amazonaws.com/{basePath}"
   variables:
     basePath:
       default: "/dev"
 paths:
   /event/{datasetId}/{version}:
+    post:
+      summary: "Takes a single event and puts it on a data stream."
+      description: "Takes a single event and puts it on a data stream."
+      parameters:
+      - name: "version"
+        in: "path"
+        description: "Version for destination dataset"
+        required: true
+        schema:
+          type: "string"
+      - name: "datasetId"
+        in: "path"
+        description: "Identifier for destination dataset"
+        required: true
+        schema:
+          type: "string"
+      requestBody:
+        description: "An arbitrary json object."
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/postEventRequest"
+        required: true
+      responses:
+        404:
+          description: "404 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/standardResponse"
+        200:
+          description: "200 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/standardResponse"
+        400:
+          description: "400 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/standardResponse"
+        500:
+          description: "500 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/serverError"
+        403:
+          description: "403 response"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/standardResponse"
+      security:
+      - api_key: []
+  /events/{datasetId}/{version}:
     post:
       summary: "Takes a list of events and puts them on a data stream."
       description: "Takes a list of events and puts them on a data stream."
@@ -30,7 +87,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/postEventRequest"
+              $ref: "#/components/schemas/postEventsRequest"
         required: true
       responses:
         404:
@@ -38,19 +95,19 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/postEventStandardResponse"
+                $ref: "#/components/schemas/standardResponse"
         200:
           description: "200 response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/postEventStandardResponse"
+                $ref: "#/components/schemas/standardResponse"
         400:
           description: "400 response"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/postEventStandardResponse"
+                $ref: "#/components/schemas/standardResponse"
         500:
           description: "500 response"
           content:
@@ -62,19 +119,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/postEventStandardResponse"
+                $ref: "#/components/schemas/standardResponse"
       security:
       - api_key: []
 components:
   schemas:
     postEventRequest:
       title: "Post Event Request"
-      type: "array"
-      description: "An arbitrary json."
-      items:
-        type: "object"
-    postEventStandardResponse:
-      title: "Post Event Standard Response"
+      type: "object"
+      description: "An arbitrary json object."
+    standardResponse:
+      title: "Standard Response"
       required:
       - "message"
       type: "object"
@@ -82,8 +137,14 @@ components:
         message:
           type: "string"
       description: "Response on success."
+    postEventsRequest:
+      title: "Post Events Request"
+      type: "array"
+      description: "An array of json objects."
+      items:
+        type: "object"
     serverError:
-      title: "Post Event Failed Elements Responses"
+      title: "Server Error"
       required:
       - "message"
       type: "object"

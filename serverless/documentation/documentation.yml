@@ -1,12 +1,17 @@
-version: 0.4.0
+version: 0.7.0
 summary: Api for sending events to the data platform.
 description: Entrypoint to the data platform.
 models:
   -
-    name: postEventsRequest
-    description: An arbitrary json.
+    name: postEventRequest
+    description: An arbitrary json object.
     contentType: application/json
     schema: ${file(serverless/documentation/schemas/postEventRequest.json)}
+  -
+    name: postEventsRequest
+    description: An array of json objects.
+    contentType: application/json
+    schema: ${file(serverless/documentation/schemas/postEventsRequest.json)}
   -
     name: standardResponse
     description: Response on success.
@@ -16,4 +21,4 @@ models:
     name: serverError
     description: Internal server error.
     contentType: application/json
-    schema: ${file(serverless/documentation/schemas/postEventFailedElements.json)}
+    schema: ${file(serverless/documentation/schemas/serverErrorResponse.json)}

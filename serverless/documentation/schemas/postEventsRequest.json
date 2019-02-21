@@ -1,6 +1,6 @@
 {
   "type": "array",
-  "title": "Post Event Request",
+  "title": "Post Events Request",
   "items": {
     "type": "object"
   }

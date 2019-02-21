@@ -1,6 +1,6 @@
 {
   "type": "object",
-  "title": "Post Event Failed Elements Responses",
+  "title": "Server Error",
   "properties": {
     "message": {
       "type": "string"
