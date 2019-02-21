@@ -24,7 +24,8 @@ provider:
 
 
 functions:
-  postEvent: ${file(serverless/functions/postEvent.yaml)}
+  postEvents: ${file(serverless/functions/postEvents.yml)}
+  postEvent: ${file(serverless/functions/postEvent.yml)}
 
 package:
   exclude:
@@ -40,4 +41,4 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: non-linux
-  documentation: ${file(serverless/documentation/documentation.yaml)}
+  documentation: ${file(serverless/documentation/documentation.yml)}

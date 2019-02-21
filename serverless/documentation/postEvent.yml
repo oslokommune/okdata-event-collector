@@ -1,5 +1,5 @@
-summary: Takes a list of events and puts them on a data stream.
-description: Takes a list of events and puts them on a data stream.
+summary: Takes a single event and puts it on a data stream.
+description: Takes a single event and puts it on a data stream.
 pathParams:
   -
     name: datasetId
@@ -10,26 +10,26 @@ pathParams:
     description: Version for destination dataset
     required: true
 requestBody:
-  description: Array of json objects.
+  description: An arbitrary json object.
 requestModels:
   "application/json": postEventRequest
 methodResponses:
   -
     statusCode: '200'
     responseModels:
-      "application/json": postEventStandardResponse
+      "application/json": standardResponse
   -
     statusCode: '400'
     responseModels:
-      "application/json": postEventStandardResponse
+      "application/json": standardResponse
   -
     statusCode: '403'
     responseModels:
-      "application/json": postEventStandardResponse
+      "application/json": standardResponse
   -
     statusCode: '404'
     responseModels:
-      "application/json": postEventStandardResponse
+      "application/json": standardResponse
   -
     statusCode: '500'
     responseModels:

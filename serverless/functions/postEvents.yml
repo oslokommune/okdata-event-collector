@@ -1,0 +1,11 @@
+handler: src/main/handler.post_events
+events:
+  - http:
+      path: events/{datasetId}/{version}
+      method: post
+      private: true
+      parameters:
+        paths:
+          datasetId: true
+          version: true
+      documentation: ${file(serverless/documentation/postEvents.yml)}

@@ -1,6 +1,6 @@
 import json
 
-event = {
+event_with_list = {
     'pathParameters': {
         'datasetId': 'd123',
         'version': 'v123'
@@ -21,6 +21,14 @@ event = {
     ])
 }
 
+event_with_object = {
+    'pathParameters': {
+        'datasetId': 'd123',
+        'version': 'v123'
+    },
+    'body': json.dumps({'key00': 'value00'})
+}
+
 ok_response = {
     'statusCode': 200,
     'body': json.dumps({'message': 'Ok'})
@@ -29,11 +37,11 @@ ok_response = {
 failed_record_list = [
     {
         'PartitionKey': 'aa-bb',
-        'Data': '{"data": {"key00": "value00"}, "datasetId": "d123", "version": "v123"}'
+        'Data': '{"key00": "value00"}'
     },
     {
         'PartitionKey': 'aa-bb',
-        'Data': '{"data": {"key10": "value10"}, "datasetId": "d123", "version": "v123"}'
+        'Data': '{"key10": "value10"}'
     }
 ]
 
@@ -88,7 +96,7 @@ validation_error_event_1 = {
         'datasetId': 'd123',
         'version': 'v123'
     },
-    'body': '{"key": "value"}'
+    'body': '"value"'
 }
 
 validation_error_event_2 = {

@@ -1,4 +1,4 @@
-handler: src/main/handler.post_event
+handler: src/main/handler.post_events
 events:
   - http:
       path: event/{datasetId}/{version}
@@ -8,4 +8,4 @@ events:
         paths:
           datasetId: true
           version: true
-      documentation: ${file(serverless/documentation/postEvent.yaml)}
+      documentation: ${file(serverless/documentation/postEvent.yml)}
