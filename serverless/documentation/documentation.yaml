@@ -3,12 +3,12 @@ summary: Api for sending events to the data platform.
 description: Entrypoint to the data platform.
 models:
   -
-    name: postEventRequest
+    name: postEventsRequest
     description: An arbitrary json.
     contentType: application/json
     schema: ${file(serverless/documentation/schemas/postEventRequest.json)}
   -
-    name: postEventStandardResponse
+    name: standardResponse
     description: Response on success.
     contentType: application/json
     schema: ${file(serverless/documentation/schemas/postEventStandardResponse.json)}

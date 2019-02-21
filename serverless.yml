@@ -24,7 +24,7 @@ provider:
 
 
 functions:
-  postEvent: ${file(serverless/functions/postEvent.yaml)}
+  postEvents: ${file(serverless/functions/postEvents.yaml)}
 
 package:
   exclude:

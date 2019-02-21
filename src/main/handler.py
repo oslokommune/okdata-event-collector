@@ -11,19 +11,19 @@ from jsonschema import validate, ValidationError
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-request_schema = None
+post_events_request_schema = None
 
-with open('serverless/documentation/schemas/postEventRequest.json') as f:
-    request_schema = json.loads(f.read())
+with open('serverless/documentation/schemas/postEventsRequest.json') as f:
+    post_events_request_schema = json.loads(f.read())
 
 
-def post_event(event, context, retries=3):
+def post_events(event, context, retries=3):
     dataset_id, dataset_version = event['pathParameters']['datasetId'], event['pathParameters']['version']
     if not get_metadata(dataset_id, dataset_version):
         return not_found_response(dataset_id, dataset_version)
 
     try:
-        validate(json.loads(event['body']), request_schema)
+        validate(json.loads(event['body']), post_events_request_schema)
         record_list = event_to_record_list(event)
     except JSONDecodeError as e:
         logger.exception(f'Body is not a valid JSON document: {e}')

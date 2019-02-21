@@ -1,6 +1,6 @@
 import json
 
-event = {
+event_with_list = {
     'pathParameters': {
         'datasetId': 'd123',
         'version': 'v123'
