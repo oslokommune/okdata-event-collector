@@ -15,6 +15,8 @@ provider:
     name: ok-origo-dataplatform-config-${self:provider.stage}
     serverSideEncryption: AES256
   deploymentPrefix: deploy
+  environment:
+    METADATA_API_URL: ${ssm:/metadata/url}
   iamManagedPolicies:
     - Fn::Join:
         - ':'
