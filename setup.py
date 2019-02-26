@@ -15,6 +15,7 @@ setuptools.setup(
     url="https://github.oslo.kommune.no/origo-dataplatform/event-collector",
     packages=setuptools.find_packages(),
     install_requires=[
-        'jsonschema==2.6.0'
+        'jsonschema==2.6.0',
+        'requests==2.21.0'
     ]
 )
