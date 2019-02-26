@@ -1,4 +1,5 @@
 import json
+import os
 import boto3
 import logging
 import traceback
@@ -15,7 +16,7 @@ logger.setLevel(logging.INFO)
 
 post_events_request_schema = None
 
-metadata_api_url = 'metadata.api-test.oslo.kommune.no/dev'
+metadata_api_url = os.environ['METADATA_API_URL']
 metadata_api_client = MetadataApiClient(metadata_api_url)
 
 with open('serverless/documentation/schemas/postEventsRequest.json') as f:

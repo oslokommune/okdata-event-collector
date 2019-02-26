@@ -12,9 +12,6 @@ import src.tests.test_data.extract_event_body_test_data as extract_event_body_te
 import requests_mock
 from moto import mock_kinesis
 
-
-handler.metadata_api_client.url = 'https://test.com'
-
 class Tester(unittest.TestCase):
 
     get_version_url = f'{handler.metadata_api_client.url}/{post_event_data.get_metadata_route}'
