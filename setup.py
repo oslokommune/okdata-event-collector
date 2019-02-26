@@ -16,7 +16,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'jsonschema==2.6.0',
-        'requests-mock==1.5.2',
         'requests==2.21.0'
     ]
 )
