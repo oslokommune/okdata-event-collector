@@ -27,7 +27,7 @@ Example Lambda proxy HTTP event input:
 {
     "pathParameters": {
         "datasetId": "d123",
-        "version" "v123"
+        "version": "v123"
     },
     "body": "[{\"key\": \"value\"}]"
 }

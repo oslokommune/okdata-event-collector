@@ -7,22 +7,26 @@ import uuid
 from json.decoder import JSONDecodeError
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
+from requests.exceptions import RequestException
+from src.main.metadata_api_client import *
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 post_events_request_schema = None
 
+metadata_api_url = 'metadata.api-test.oslo.kommune.no/dev'
+metadata_api_client = MetadataApiClient(metadata_api_url)
+
 with open('serverless/documentation/schemas/postEventsRequest.json') as f:
     post_events_request_schema = json.loads(f.read())
 
 
 def post_events(event, context, retries=3):
-    dataset_id, dataset_version = event['pathParameters']['datasetId'], event['pathParameters']['version']
-    if not get_metadata(dataset_id, dataset_version):
-        return not_found_response(dataset_id, dataset_version)
+    dataset_id, version_id = event['pathParameters']['datasetId'], event['pathParameters']['version']
 
     try:
+        metadata_api_client.get_version(dataset_id, version_id)
         event_body = extract_event_body(event)
         validate(event_body, post_events_request_schema)
         record_list = event_to_record_list(event_body)
@@ -32,8 +36,15 @@ def post_events(event, context, retries=3):
     except ValidationError as e:
         logger.exception(f'JSON document does not conform to the given schema: {e}')
         return error_response(400, 'JSON document does not conform to the given schema')
+    except NotFoundException:
+        return not_found_response(dataset_id, version_id)
+    except ServerErrorException:
+        return error_response(500, 'Internal server error')
+    except RequestException as e:
+        logger.exception(f'Error when calling metadata-api: {e}')
+        return error_response(500, 'Internal server error')
 
-    stream_name = f'green.{dataset_id}.incoming.{dataset_version}.json'
+    stream_name = f'green.{dataset_id}.incoming.{version_id}.json'
 
     try:
         kinesis_response, failed_record_list = put_records_to_kinesis(record_list, stream_name, retries)
@@ -78,12 +89,6 @@ def get_failed_records(put_records_response, record_list):
         if 'ErrorCode' in put_records_response['Records'][i]:
             failed_record_list.append(record_list[i])
     return failed_record_list
-
-
-def get_metadata(dataset_id, dataset_version):
-    if (dataset_id, dataset_version) == ('1234', '4321'):
-        return False
-    return True
 
 
 def event_to_record_list(event_body):
@@ -134,4 +139,3 @@ def not_found_response(dataset_id, dataset_version):
 
 def extract_record_data(record):
     return json.loads(record['Data'])
-

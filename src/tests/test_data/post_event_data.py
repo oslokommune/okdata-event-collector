@@ -1,9 +1,14 @@
 import json
 
+datasetId='d123'
+versionId='v123'
+
+get_metadata_route = f'datasets/{datasetId}/versions/{versionId}'
+
 event_with_list = {
     'pathParameters': {
-        'datasetId': 'd123',
-        'version': 'v123'
+        'datasetId': datasetId,
+        'version': versionId
     },
     'body': json.dumps([
         {
@@ -23,8 +28,8 @@ event_with_list = {
 
 event_with_object = {
     'pathParameters': {
-        'datasetId': 'd123',
-        'version': 'v123'
+        'datasetId': datasetId,
+        'version': versionId
     },
     'body': json.dumps({'key00': 'value00'})
 }
@@ -45,34 +50,9 @@ failed_record_list = [
     }
 ]
 
-event_not_found = {
-    'pathParameters': {
-        'datasetId': '1234',
-        'version': '4321'
-    },
-    'body': json.dumps([
-        {
-            'key00': 'value00',
-            'key01': 'value01'
-        }
-    ])
-}
-
 not_found_response = {
     'statusCode': 404,
-    'body': json.dumps({'message': f'Dataset with id:1234 and version:4321 does not exist'})
-}
-
-client_error_event = {
-    'pathParameters': {
-        'datasetId': 'not',
-        'version': 'exist'
-    },
-    'body': json.dumps([
-        {
-            'key00': 'value00'
-        }
-    ])
+    'body': json.dumps({'message': f'Dataset with id:{datasetId} and version:{versionId} does not exist'})
 }
 
 error_response= {
@@ -83,8 +63,8 @@ error_response= {
 
 decode_error_event = {
     'pathParameters': {
-        'datasetId': 'd123',
-        'version': 'v123'
+        'datasetId': datasetId,
+        'version': versionId
     },
     'body': '{'
 }
@@ -93,16 +73,16 @@ decode_error_response = {'statusCode': 400, 'body': '{"message": "Body is not a 
 
 validation_error_event_1 = {
     'pathParameters': {
-        'datasetId': 'd123',
-        'version': 'v123'
+        'datasetId': datasetId,
+        'version': versionId
     },
     'body': '"value"'
 }
 
 validation_error_event_2 = {
     'pathParameters': {
-        'datasetId': 'd123',
-        'version': 'v123'
+        'datasetId': datasetId,
+        'version': versionId
     },
     'body': '["value"]'
 }
