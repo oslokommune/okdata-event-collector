@@ -2,8 +2,6 @@ import unittest
 from mock import patch
 import boto3
 import json
-from requests.exceptions import RequestException
-
 import src.main.handler as handler
 import src.tests.test_data.event_to_record_data as event_to_record_data
 import src.tests.test_data.get_failed_records_data as get_failed_records_data
@@ -14,7 +12,7 @@ from moto import mock_kinesis
 
 class Tester(unittest.TestCase):
 
-    get_version_url = f'{handler.metadata_api_client.url}/{post_event_data.get_metadata_route}'
+    get_version_url = f'{handler.metadata_api_client.url}/{post_event_data.get_dataset_versions_route}'
 
     metadata_api_response_body = json.dumps([{'versionID': 'v123','version': '1','datasetID': 'd123'}])
 
@@ -39,7 +37,7 @@ class Tester(unittest.TestCase):
         for i in range(100):
             record_list.append({
                 'PartitionKey': 'aa-bb',
-                'Data': '{"data": {"key30": "value30", "key31": "value31"}, "datasetId": "d123", "version": "v123"}'
+                'Data': '{"data": {"key30": "value30", "key31": "value31"}, "datasetId": "d123", "version": "1"}'
             })
         put_records_response = handler.put_records_to_kinesis(record_list, stream_name, 3)
 
@@ -52,7 +50,7 @@ class Tester(unittest.TestCase):
         print(self.get_version_url)
         kwargs['mock'].register_uri('GET', self.get_version_url, text=self.metadata_api_response_body, status_code=200)
         conn = boto3.client('kinesis', region_name='eu-west-1')
-        stream_name = 'green.d123.incoming.v123.json'
+        stream_name = 'green.d123.incoming.1.json'
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_events(post_event_data.event_with_list, None)
 
@@ -63,7 +61,7 @@ class Tester(unittest.TestCase):
     def test_post_single_event(self, **kwargs):
         kwargs['mock'].register_uri('GET', self.get_version_url, text=self.metadata_api_response_body, status_code=200)
         conn = boto3.client('kinesis', region_name='eu-west-1')
-        stream_name = 'green.d123.incoming.v123.json'
+        stream_name = 'green.d123.incoming.1.json'
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_events(post_event_data.event_with_object, None)
 
@@ -90,12 +88,6 @@ class Tester(unittest.TestCase):
     @requests_mock.Mocker(kw='mock')
     def test_post_events_metadata_server_error(self, **kwargs):
         kwargs['mock'].register_uri('GET', self.get_version_url, text=self.metadata_api_response_body, status_code=500)
-        post_event_response = handler.post_events(post_event_data.event_with_list, None)
-        self.assertDictEqual(post_event_response, post_event_data.error_response)
-
-    @patch('src.main.handler.metadata_api_client.get_version')
-    def test_post_events_metadata_request_exception(self, method_mock):
-        method_mock.side_effect = RequestException()
         post_event_response = handler.post_events(post_event_data.event_with_list, None)
         self.assertDictEqual(post_event_response, post_event_data.error_response)
 

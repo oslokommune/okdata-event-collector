@@ -1,4 +1,3 @@
-import json
 import os
 import boto3
 import logging
@@ -8,8 +7,8 @@ import uuid
 from json.decoder import JSONDecodeError
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
-from requests.exceptions import RequestException
-from src.main.metadata_api_client import *
+from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
+from src.main.handler_responses import *
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -24,10 +23,7 @@ with open('serverless/documentation/schemas/postEventsRequest.json') as f:
 
 
 def post_events(event, context, retries=3):
-    dataset_id, version_id = event['pathParameters']['datasetId'], event['pathParameters']['version']
-
     try:
-        metadata_api_client.get_version(dataset_id, version_id)
         event_body = extract_event_body(event)
         validate(event_body, post_events_request_schema)
         record_list = event_to_record_list(event_body)
@@ -37,15 +33,17 @@ def post_events(event, context, retries=3):
     except ValidationError as e:
         logger.exception(f'JSON document does not conform to the given schema: {e}')
         return error_response(400, 'JSON document does not conform to the given schema')
-    except NotFoundException:
-        return not_found_response(dataset_id, version_id)
+
+
+    dataset_id, version = event['pathParameters']['datasetId'], event['pathParameters']['version']
+    try:
+        if not metadata_api_client.version_exists(dataset_id, version):
+            return not_found_response(dataset_id, version)
     except ServerErrorException:
-        return error_response(500, 'Internal server error')
-    except RequestException as e:
-        logger.exception(f'Error when calling metadata-api: {e}')
+        logger.info('Metadata-api responded with 500 server error')
         return error_response(500, 'Internal server error')
 
-    stream_name = f'green.{dataset_id}.incoming.{version_id}.json'
+    stream_name = f'green.{dataset_id}.incoming.{version}.json'
 
     try:
         kinesis_response, failed_record_list = put_records_to_kinesis(record_list, stream_name, retries)
@@ -104,39 +102,3 @@ def event_to_record_list(event_body):
         )
 
     return record_list
-
-
-def failed_elements_response(failed_record_list):
-    failed_element_list = list(map(lambda record: extract_record_data(record), failed_record_list))
-    lambda_proxy_response = {
-        'statusCode': 500,
-        'body': json.dumps({
-            'message': 'Request failed for some elements',
-            'failedElements': failed_element_list
-        })
-    }
-    return lambda_proxy_response
-
-
-def ok_response():
-    lambda_proxy_response = {
-        'statusCode': 200,
-        'body': json.dumps({'message': 'Ok'})
-    }
-    return lambda_proxy_response
-
-def error_response(status, message):
-    return {
-        'statusCode': status,
-        'body': json.dumps({'message': message})
-    }
-
-def not_found_response(dataset_id, dataset_version):
-    return {
-        'statusCode': 404,
-        'body': json.dumps({'message': f'Dataset with id:{dataset_id} and version:{dataset_version} does not exist'})
-    }
-
-
-def extract_record_data(record):
-    return json.loads(record['Data'])
