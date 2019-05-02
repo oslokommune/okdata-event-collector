@@ -1,8 +1,9 @@
 import unittest
-from requests.exceptions import RequestException
 import requests_mock
+import json
+from requests.exceptions import RequestException
 from unittest.mock import patch
-from src.main.metadata_api_client import *
+from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
 
 metadata_api_response_body = [
     {

@@ -7,7 +7,6 @@ import uuid
 from json.decoder import JSONDecodeError
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
-from requests.exceptions import RequestException
 from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
 from src.main.handler_responses import *
 

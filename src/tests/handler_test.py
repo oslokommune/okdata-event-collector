@@ -2,8 +2,6 @@ import unittest
 from mock import patch
 import boto3
 import json
-from requests.exceptions import RequestException
-from src.main.metadata_api_client import ServerErrorException
 import src.main.handler as handler
 import src.tests.test_data.event_to_record_data as event_to_record_data
 import src.tests.test_data.get_failed_records_data as get_failed_records_data
