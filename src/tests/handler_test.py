@@ -3,7 +3,7 @@ from mock import patch
 import boto3
 import json
 from requests.exceptions import RequestException
-
+from src.main.metadata_api_client import ServerErrorException
 import src.main.handler as handler
 import src.tests.test_data.event_to_record_data as event_to_record_data
 import src.tests.test_data.get_failed_records_data as get_failed_records_data
@@ -90,12 +90,6 @@ class Tester(unittest.TestCase):
     @requests_mock.Mocker(kw='mock')
     def test_post_events_metadata_server_error(self, **kwargs):
         kwargs['mock'].register_uri('GET', self.get_version_url, text=self.metadata_api_response_body, status_code=500)
-        post_event_response = handler.post_events(post_event_data.event_with_list, None)
-        self.assertDictEqual(post_event_response, post_event_data.error_response)
-
-    @patch('src.main.handler.metadata_api_client.get_version')
-    def test_post_events_metadata_request_exception(self, method_mock):
-        method_mock.side_effect = RequestException()
         post_event_response = handler.post_events(post_event_data.event_with_list, None)
         self.assertDictEqual(post_event_response, post_event_data.error_response)
 
