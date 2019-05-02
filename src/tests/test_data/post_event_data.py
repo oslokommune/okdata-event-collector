@@ -1,14 +1,14 @@
 import json
 
 datasetId='d123'
-versionId='v123'
+version= '1'
 
-get_metadata_route = f'datasets/{datasetId}/versions/{versionId}'
+get_dataset_versions_route = f'datasets/{datasetId}/versions/'
 
 event_with_list = {
     'pathParameters': {
         'datasetId': datasetId,
-        'version': versionId
+        'version': version
     },
     'body': json.dumps([
         {
@@ -29,7 +29,7 @@ event_with_list = {
 event_with_object = {
     'pathParameters': {
         'datasetId': datasetId,
-        'version': versionId
+        'version': version
     },
     'body': json.dumps({'key00': 'value00'})
 }
@@ -52,7 +52,7 @@ failed_record_list = [
 
 not_found_response = {
     'statusCode': 404,
-    'body': json.dumps({'message': f'Dataset with id:{datasetId} and version:{versionId} does not exist'})
+    'body': json.dumps({'message': f'Dataset with id:{datasetId} and version:{version} does not exist'})
 }
 
 error_response= {
@@ -64,7 +64,7 @@ error_response= {
 decode_error_event = {
     'pathParameters': {
         'datasetId': datasetId,
-        'version': versionId
+        'version': version
     },
     'body': '{'
 }
@@ -74,7 +74,7 @@ decode_error_response = {'statusCode': 400, 'body': '{"message": "Body is not a 
 validation_error_event_1 = {
     'pathParameters': {
         'datasetId': datasetId,
-        'version': versionId
+        'version': version
     },
     'body': '"value"'
 }
@@ -82,7 +82,7 @@ validation_error_event_1 = {
 validation_error_event_2 = {
     'pathParameters': {
         'datasetId': datasetId,
-        'version': versionId
+        'version': version
     },
     'body': '["value"]'
 }

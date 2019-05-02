@@ -18,43 +18,58 @@ class Tester(unittest.TestCase):
 
     @requests_mock.Mocker()
     def test_get_version(self, request_mocker):
-        dataset_id, version_id = 'd123', 'v123'
+        dataset_id, version = 'd123', '1'
 
-        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/{version_id}'
+        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/'
 
         metadata_api_client = MetadataApiClient(self.TEST_URL)
 
         request_mocker.register_uri('GET', url_with_path_params, text=json.dumps(metadata_api_response_body), status_code=200)
 
-        response = metadata_api_client.get_version(dataset_id, version_id)
+        response = metadata_api_client.get_version(dataset_id, version)
 
         self.assertListEqual(metadata_api_response_body, response)
 
     @requests_mock.Mocker()
-    def test_get_version_not_found(self, request_mocker):
-        dataset_id, version_id = 'd123', 'v123'
+    def test_get_version_dataset_not_found(self, request_mocker):
+        dataset_id, version = 'd123', '1'
 
-        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/{version_id}'
+        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/'
 
         metadata_api_client = MetadataApiClient(self.TEST_URL)
 
         request_mocker.register_uri('GET', url_with_path_params, text="Not found", status_code=404)
 
         with self.assertRaises(NotFoundException):
-            metadata_api_client.get_version(dataset_id, version_id)
+            metadata_api_client.get_version(dataset_id, version)
+
+
+    @requests_mock.Mocker()
+    def test_get_version_version_not_found(self, request_mocker):
+        dataset_id, version_not_exist = 'd123', '2'
+
+        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/'
+
+        metadata_api_client = MetadataApiClient(self.TEST_URL)
+
+        request_mocker.register_uri('GET', url_with_path_params, text=json.dumps(metadata_api_response_body),
+                                    status_code=200)
+
+        with self.assertRaises(NotFoundException):
+            metadata_api_client.get_version(dataset_id, version_not_exist)
 
     @requests_mock.Mocker()
     def test_get_version_server_error(self, request_mocker):
-        dataset_id, version_id = 'd123', 'v123'
+        dataset_id, version = 'd123', '1'
 
-        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/{version_id}'
+        url_with_path_params = f'{self.TEST_URL}/datasets/{dataset_id}/versions/'
 
         metadata_api_client = MetadataApiClient(self.TEST_URL)
 
         request_mocker.register_uri('GET', url_with_path_params, text="Not found", status_code=500)
 
         with self.assertRaises(ServerErrorException):
-            metadata_api_client.get_version(dataset_id, version_id)
+            metadata_api_client.get_version(dataset_id, version)
 
 
 if __name__ == '__main__':

@@ -10,6 +10,7 @@ from botocore.client import ClientError
 from jsonschema import validate, ValidationError
 from requests.exceptions import RequestException
 from src.main.metadata_api_client import *
+from src.main.handler_responses import *
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -104,39 +105,3 @@ def event_to_record_list(event_body):
         )
 
     return record_list
-
-
-def failed_elements_response(failed_record_list):
-    failed_element_list = list(map(lambda record: extract_record_data(record), failed_record_list))
-    lambda_proxy_response = {
-        'statusCode': 500,
-        'body': json.dumps({
-            'message': 'Request failed for some elements',
-            'failedElements': failed_element_list
-        })
-    }
-    return lambda_proxy_response
-
-
-def ok_response():
-    lambda_proxy_response = {
-        'statusCode': 200,
-        'body': json.dumps({'message': 'Ok'})
-    }
-    return lambda_proxy_response
-
-def error_response(status, message):
-    return {
-        'statusCode': status,
-        'body': json.dumps({'message': message})
-    }
-
-def not_found_response(dataset_id, dataset_version):
-    return {
-        'statusCode': 404,
-        'body': json.dumps({'message': f'Dataset with id:{dataset_id} and version:{dataset_version} does not exist'})
-    }
-
-
-def extract_record_data(record):
-    return json.loads(record['Data'])
