@@ -21,18 +21,18 @@ event_body = [
 expected = [
     {
         'PartitionKey': 'aa-bb',
-        'Data': '{"key00": "value00", "key01": "value01"}'
+        'Data': '{"key00": "value00", "key01": "value01"}\n'
     },
     {
         'PartitionKey': 'aa-bb',
-        'Data': '{"key10": "value10", "key11": "value11"}'
+        'Data': '{"key10": "value10", "key11": "value11"}\n'
     },
     {
         'PartitionKey': 'aa-bb',
-        'Data': '{"key20": "value20", "key21": "value21"}'
+        'Data': '{"key20": "value20", "key21": "value21"}\n'
     },
     {
         'PartitionKey': 'aa-bb',
-        'Data': '{"key30": "value30", "key31": "value31"}'
+        'Data': '{"key30": "value30", "key31": "value31"}\n'
     }
 ]
