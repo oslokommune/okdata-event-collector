@@ -96,7 +96,7 @@ def event_to_record_list(event_body):
     for element in event_body:
         record_list.append(
             {
-                'Data': json.dumps(element),
+                'Data': f'{json.dumps(element)}\n',
                 'PartitionKey': str(uuid.uuid4())
             }
         )
