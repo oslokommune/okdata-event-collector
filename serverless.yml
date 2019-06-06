@@ -16,7 +16,7 @@ provider:
     serverSideEncryption: AES256
   deploymentPrefix: deploy
   environment:
-    METADATA_API_URL: ${ssm:/metadata/url}
+    METADATA_API_URL: ${ssm:/dataplatform/metadata-api/url}
   iamManagedPolicies:
     - Fn::Join:
         - ':'
