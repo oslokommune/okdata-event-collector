@@ -34,9 +34,9 @@ def post_events(event, context, retries=3):
         logger.exception(f'JSON document does not conform to the given schema: {e}')
         return error_response(400, 'JSON document does not conform to the given schema')
 
-    dataset_id, version = event['pathParameters']['datasetId'], event['pathParameters']['version']
+    logger.info(f"Received {len(event_body)} events for dataset {dataset_id}/{version}")
 
-    logger.info(f"POST /{dataset_id}/{version}")
+    dataset_id, version = event['pathParameters']['datasetId'], event['pathParameters']['version']
 
     try:
         if not metadata_api_client.version_exists(dataset_id, version):
