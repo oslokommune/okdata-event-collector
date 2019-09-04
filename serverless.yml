@@ -1,4 +1,4 @@
-frameworkVersion: ">=1.1.0 <2.0.0"
+frameworkVersion: ">=1.50.0 <2.0.0"
 
 service: event-collector
 
@@ -43,4 +43,5 @@ plugins:
 custom:
   pythonRequirements:
     dockerizePip: non-linux
+    usePoetry: false
   documentation: ${file(serverless/documentation/documentation.yml)}
