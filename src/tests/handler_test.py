@@ -64,7 +64,7 @@ class Tester(unittest.TestCase):
             status_code=200,
         )
         conn = boto3.client("kinesis", region_name="eu-west-1")
-        stream_name = "green.d123.incoming.1.json"
+        stream_name = "dp.green.d123.incoming.1.json"
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_events(post_event_data.event_with_list, None)
 
@@ -80,7 +80,7 @@ class Tester(unittest.TestCase):
             status_code=200,
         )
         conn = boto3.client("kinesis", region_name="eu-west-1")
-        stream_name = "green.d123.incoming.1.json"
+        stream_name = "dp.green.d123.incoming.1.json"
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_events(
             post_event_data.event_with_object, None
@@ -137,7 +137,7 @@ class Tester(unittest.TestCase):
             status_code=200,
         )
         conn = boto3.client("kinesis", region_name="eu-west-1")
-        stream_name = "green.dataset-123.incoming.version-123.json"
+        stream_name = "dp.green.dataset-123.incoming.version-123.json"
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_events(post_event_data.event_with_list, None)
         self.assertDictEqual(post_event_response, post_event_data.error_response)

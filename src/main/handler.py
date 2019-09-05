@@ -55,7 +55,7 @@ def post_events(event, context, retries=3):
         logger.info("Metadata-api responded with 500 server error")
         return error_response(500, "Internal server error")
 
-    stream_name = f"green.{dataset_id}.incoming.{version}.json"
+    stream_name = f"dp.green.{dataset_id}.incoming.{version}.json"
 
     try:
         kinesis_response, failed_record_list = put_records_to_kinesis(
