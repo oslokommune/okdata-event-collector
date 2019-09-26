@@ -15,15 +15,27 @@ provider:
     name: ok-origo-dataplatform-config-${self:provider.stage}
     serverSideEncryption: AES256
   deploymentPrefix: deploy
+  tracing:
+    lambda: true
+    apiGateway: true
   environment:
-    METADATA_API_URL: ${ssm:/dataplatform/metadata-api/url}
+    METADATA_API: ${ssm:/dataplatform/metadata-api/url}
+    AUTHORIZER_API: ${ssm:/dataplatform/simple-dataset-authorizer/url}
+    ENABLE_AUTH: true
+    KEYCLOAK_SERVER: ${ssm:/keycloak/client/server}
+    KEYCLOAK_REALM: api-catalog
+    CLIENT_ID: event-collector
+    CLIENT_SECRET: ${ssm:/dataplatform/apis/event-collector/auth/client_secret~true}
   iamManagedPolicies:
     - Fn::Join:
         - ':'
         - - 'arn:aws:iam:'
           - Ref: AWS::AccountId
           - 'policy/event-collector-policy'
-
+    - Fn::Join:
+        - ':'
+        - - 'arn:aws:iam::aws'
+          - 'policy/AWSXRayDaemonWriteAccess'
 
 functions:
   postEvents: ${file(serverless/functions/postEvents.yml)}

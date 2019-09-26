@@ -15,6 +15,7 @@ class MetadataApiClient:
     def version_exists(self, dataset_id, version):
         get_version_url = f"{self.url}/datasets/{dataset_id}/versions/"
         try:
+
             response = requests.get(get_version_url)
         except RequestException as e:
             logger.exception(f"Error when calling metadata-api: {e}")

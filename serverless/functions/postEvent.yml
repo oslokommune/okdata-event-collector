@@ -1,4 +1,6 @@
 handler: src/main/handler.post_events
+layers:
+  - ${ssm:/dataplatform/python-base-lambda-layer/arn}
 events:
   - http:
       path: event/{datasetId}/{version}
@@ -9,3 +11,9 @@ events:
           datasetId: true
           version: true
       documentation: ${file(serverless/documentation/postEvent.yml)}
+      authorizer:
+        arn: arn:aws:lambda:${self:provider.region}:***REMOVED***:function:keycloak-authorizer-${self:provider.stage}-authenticate
+        resultTtlInSeconds: 300
+        identitySource: method.request.header.Authorization
+        identityValidationExpression: "^(b|B)earer [-0-9a-zA-Z\\._]*$"
+        type: token

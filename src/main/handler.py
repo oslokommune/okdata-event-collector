@@ -9,6 +9,8 @@ import boto3
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
 
+from auth import SimpleAuth
+
 from src.main.handler_responses import (
     error_response,
     not_found_response,
@@ -22,14 +24,26 @@ logger.setLevel(logging.INFO)
 
 post_events_request_schema = None
 
-metadata_api_url = os.environ["METADATA_API_URL"]
+metadata_api_url = os.environ["METADATA_API"]
 metadata_api_client = MetadataApiClient(metadata_api_url)
+
+ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
 
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
 
 
 def post_events(event, context, retries=3):
+
+    dataset_id, version = (
+        event["pathParameters"]["datasetId"],
+        event["pathParameters"]["version"],
+    )
+
+    if ENABLE_AUTH and not SimpleAuth().is_owner(event, dataset_id):
+        logger.info("Access denied")
+        return error_response(403, "Forbidden")
+
     try:
         event_body = extract_event_body(event)
         validate(event_body, post_events_request_schema)
@@ -40,11 +54,6 @@ def post_events(event, context, retries=3):
     except ValidationError as e:
         logger.exception(f"JSON document does not conform to the given schema: {e}")
         return error_response(400, "JSON document does not conform to the given schema")
-
-    dataset_id, version = (
-        event["pathParameters"]["datasetId"],
-        event["pathParameters"]["version"],
-    )
 
     logger.info(f"Received {len(event_body)} events for dataset {dataset_id}/{version}")
 

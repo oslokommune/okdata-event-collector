@@ -5,6 +5,10 @@ from requests.exceptions import RequestException
 from unittest.mock import patch
 from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
 
+from aws_xray_sdk.core import xray_recorder
+
+xray_recorder.begin_segment("Test")
+
 metadata_api_response_body = [
     {"versionID": "v123", "version": "1", "datasetID": "d123"}
 ]
