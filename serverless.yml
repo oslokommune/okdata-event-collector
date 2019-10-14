@@ -30,15 +30,8 @@ provider:
     CLIENT_ID: event-collector
     CLIENT_SECRET: ${ssm:/dataplatform/apis/event-collector/auth/client_secret~true}
   iamManagedPolicies:
-    - Fn::Join:
-        - ':'
-        - - 'arn:aws:iam:'
-          - Ref: AWS::AccountId
-          - 'policy/event-collector-policy'
-    - Fn::Join:
-        - ':'
-        - - 'arn:aws:iam::aws'
-          - 'policy/AWSXRayDaemonWriteAccess'
+    - 'arn:aws:iam::#{AWS::AccountId}:policy/event-collector-policy'
+    - 'arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess'
 
 functions:
   postEvents: ${file(serverless/functions/postEvents.yml)}
@@ -55,6 +48,7 @@ plugins:
   - serverless-python-requirements
   - serverless-aws-documentation
   - serverless-plugin-git-variables
+  - serverless-pseudo-parameters
 
 custom:
   pythonRequirements:
