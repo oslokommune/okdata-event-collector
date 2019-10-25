@@ -12,7 +12,7 @@ events:
           version: true
       documentation: ${file(serverless/documentation/postEvents.yml)}
       authorizer:
-        arn: arn:aws:lambda:${self:provider.region}:#{AWS::AccountId}:function:keycloak-authorizer-${self:provider.stage}-authenticate
+        arn: ${self:custom.keycloakArn.${self:provider.stage}, self:custom.keycloakArn.dev}
         resultTtlInSeconds: 300
         identitySource: method.request.header.Authorization
         identityValidationExpression: "^(b|B)earer [-0-9a-zA-Z\\._]*$"
