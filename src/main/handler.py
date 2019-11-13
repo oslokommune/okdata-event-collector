@@ -75,6 +75,9 @@ def post_events(event, context, retries=3):
         return error_response(500, "Internal server error")
 
     if len(failed_record_list) > 0:
+        logger.warn(
+            f"${len(failed_record_list)} failed records when sending to {stream_name}"
+        )
         return failed_elements_response(failed_record_list)
 
     return ok_response()
