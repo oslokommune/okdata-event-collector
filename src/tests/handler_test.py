@@ -25,9 +25,19 @@ def mock_auth(mock, access):
     )
 
 
+def mock_get_confidentiality(requests_mocker, dataset_id, conf):
+    requests_mocker.register_uri(
+        "GET",
+        f"{handler.metadata_api_client.url}/datasets/{dataset_id}",
+        text=json.dumps({"confidentiality": conf}),
+        status_code=200,
+    )
+
+
 class Tester(unittest.TestCase):
 
     get_version_url = f"{handler.metadata_api_client.url}/{post_event_data.get_dataset_versions_route}"
+    get_dataset_url = f"{handler.metadata_api_client.url}/{post_event_data.get_dataset_versions_route}"
 
     metadata_api_response_body = json.dumps(
         [{"versionID": "v123", "version": "1", "datasetID": "d123"}]
@@ -77,6 +87,7 @@ class Tester(unittest.TestCase):
             text=self.metadata_api_response_body,
             status_code=200,
         )
+        mock_get_confidentiality(request_mocker, "d123", "green")
         conn = boto3.client("kinesis", region_name="eu-west-1")
         stream_name = "dp.green.d123.incoming.1.json"
         conn.create_stream(StreamName=stream_name, ShardCount=1)
@@ -94,8 +105,9 @@ class Tester(unittest.TestCase):
             text=self.metadata_api_response_body,
             status_code=200,
         )
+        mock_get_confidentiality(request_mocker, "d123", "yellow")
         conn = boto3.client("kinesis", region_name="eu-west-1")
-        stream_name = "dp.green.d123.incoming.1.json"
+        stream_name = "dp.yellow.d123.incoming.1.json"
         conn.create_stream(StreamName=stream_name, ShardCount=1)
         post_event_response = handler.post_events(post_event_data.event_with_object, {})
 
@@ -112,6 +124,7 @@ class Tester(unittest.TestCase):
             text=self.metadata_api_response_body,
             status_code=200,
         )
+        mock_get_confidentiality(request_mocker, "d123", "green")
         post_event_response = handler.post_events(post_event_data.event_with_list, {})
         expected_response = {
             "statusCode": 500,
@@ -153,6 +166,7 @@ class Tester(unittest.TestCase):
             text=self.metadata_api_response_body,
             status_code=200,
         )
+        mock_get_confidentiality(request_mocker, "d123", "green")
         conn = boto3.client("kinesis", region_name="eu-west-1")
         stream_name = "dp.green.dataset-123.incoming.version-123.json"
         conn.create_stream(StreamName=stream_name, ShardCount=1)

@@ -28,6 +28,17 @@ class MetadataApiClient:
         else:
             return contains_version(version, json.loads(response.content))
 
+    def get_confidentiality(self, dataset_id):
+
+        get_dataset_url = f"{self.url}/datasets/{dataset_id}"
+        response = requests.get(get_dataset_url)
+
+        if response.status_code == 200:
+            return response.json()["confidentiality"]
+
+        else:
+            response.raise_for_status()
+
 
 def contains_version(version, metadata_api_response):
     existing_versions = list(
