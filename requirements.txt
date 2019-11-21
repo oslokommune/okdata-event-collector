@@ -4,4 +4,13 @@
 #
 #    pip-compile
 #
-jsonschema==2.6.0
+attrs==19.3.0             # via jsonschema
+importlib-metadata==0.23  # via jsonschema
+jsonschema==3.2.0
+more-itertools==5.0.0     # via zipp
+pyrsistent==0.15.5        # via jsonschema
+six==1.13.0               # via jsonschema, more-itertools, pyrsistent
+zipp==0.6.0               # via importlib-metadata
+
+# The following packages are considered to be unsafe in a requirements file:
+# setuptools==41.6.0        # via jsonschema
