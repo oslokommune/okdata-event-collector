@@ -3,6 +3,7 @@ import uuid
 import json
 from json.decoder import JSONDecodeError
 
+from aws_xray_sdk.core import patch_all, xray_recorder
 import boto3
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
@@ -28,8 +29,11 @@ ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
 
+patch_all()
+
 
 @logging_wrapper("event-collector")
+@xray_recorder.capture("post_events")
 def post_events(event, context, retries=3):
 
     dataset_id, version = (
