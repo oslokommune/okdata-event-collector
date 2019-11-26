@@ -55,6 +55,10 @@ custom:
   pythonRequirements:
     dockerizePip: non-linux
     usePoetry: false
+  esLogs:
+    endpoint: ${ssm:/dataplatform/elasticsearch/endpoint}
+    index: event-collector
+    filterPattern: '{ $.function_name = "*" }'
   documentation: ${file(serverless/documentation/documentation.yml)}
   deploymentBucket:
     prod: ok-origo-dataplatform-config-prod
