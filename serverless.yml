@@ -49,6 +49,7 @@ plugins:
   - serverless-aws-documentation
   - serverless-plugin-git-variables
   - serverless-pseudo-parameters
+  - serverless-es-logs
 
 custom:
   pythonRequirements:
