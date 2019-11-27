@@ -1,15 +1,15 @@
-import logging
 import os
-import traceback
 import uuid
 import json
 from json.decoder import JSONDecodeError
 
+from aws_xray_sdk.core import patch_all, xray_recorder
 import boto3
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
 
 from auth import SimpleAuth
+from dataplatform.awslambda.logging import logging_wrapper, log_add, log_duration
 
 from src.main.handler_responses import (
     error_response,
@@ -18,9 +18,6 @@ from src.main.handler_responses import (
     ok_response,
 )
 from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
 
 post_events_request_schema = None
 
@@ -32,53 +29,66 @@ ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
 
+patch_all()
 
+
+@logging_wrapper("event-collector")
+@xray_recorder.capture("post_events")
 def post_events(event, context, retries=3):
 
     dataset_id, version = (
         event["pathParameters"]["datasetId"],
         event["pathParameters"]["version"],
     )
+    log_add(dataset_id=dataset_id, version=version)
 
-    if ENABLE_AUTH and not SimpleAuth().is_owner(event, dataset_id):
-        logger.info("Access denied")
-        return error_response(403, "Forbidden")
+    log_add(enable_auth=ENABLE_AUTH)
+    if ENABLE_AUTH:
+        is_owner = SimpleAuth().is_owner(event, dataset_id)
+        log_add(is_owner=is_owner)
+        if not is_owner:
+            return error_response(403, "Forbidden")
 
     try:
         event_body = extract_event_body(event)
         validate(event_body, post_events_request_schema)
         record_list = event_to_record_list(event_body)
     except JSONDecodeError as e:
-        logger.exception(f"Body is not a valid JSON document: {e}")
+        log_add(exc_info=e)
         return error_response(400, "Body is not a valid JSON document")
     except ValidationError as e:
-        logger.exception(f"JSON document does not conform to the given schema: {e}")
+        log_add(exc_info=e)
         return error_response(400, "JSON document does not conform to the given schema")
 
-    logger.info(f"Received {len(event_body)} events for dataset {dataset_id}/{version}")
+    log_add(num_events=len(event_body))
 
     try:
-        if not metadata_api_client.version_exists(dataset_id, version):
+        version_exists = log_duration(
+            lambda: metadata_api_client.version_exists(dataset_id, version),
+            "metadata_version_exists_duration",
+        )
+        log_add(version_exists=version_exists)
+        if not version_exists:
             return not_found_response(dataset_id, version)
-    except ServerErrorException:
-        logger.info("Metadata-api responded with 500 server error")
+    except ServerErrorException as e:
+        log_add(exc_info=e)
         return error_response(500, "Internal server error")
 
     confidentiality = metadata_api_client.get_confidentiality(dataset_id)
     stream_name = f"dp.{confidentiality}.{dataset_id}.incoming.{version}.json"
+    log_add(confidentiality=confidentiality, stream_name=stream_name)
 
     try:
-        kinesis_response, failed_record_list = put_records_to_kinesis(
-            record_list, stream_name, retries
+        kinesis_response, failed_record_list = log_duration(
+            lambda: put_records_to_kinesis(record_list, stream_name, retries),
+            "kinesis_put_records_duration",
         )
-    except ClientError:
-        logger.error(traceback.format_exc())
+    except ClientError as e:
+        log_add(exc_info=e)
         return error_response(500, "Internal server error")
 
     if len(failed_record_list) > 0:
-        logger.warn(
-            f"${len(failed_record_list)} failed records when sending to {stream_name}"
-        )
+        log_add(failed_records=len(failed_record_list))
         return failed_elements_response(failed_record_list)
 
     return ok_response()
