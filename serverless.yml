@@ -36,6 +36,7 @@ provider:
 functions:
   postEvents: ${file(serverless/functions/postEvents.yml)}
   postEvent: ${file(serverless/functions/postEvent.yml)}
+  eventWebhook: ${file(serverless/functions/eventWebhook.yml)}
 
 package:
   exclude:

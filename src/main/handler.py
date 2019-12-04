@@ -31,6 +31,13 @@ with open("serverless/documentation/schemas/postEventsRequest.json") as f:
 
 patch_all()
 
+webhook_datasets = {
+    "***REMOVED***": {
+        "dataset_id": "badetemperatur-sensordata-fra-lmc",
+        "version": "1",
+    }
+}
+
 
 @logging_wrapper("event-collector")
 @xray_recorder.capture("post_events")
@@ -52,7 +59,6 @@ def post_events(event, context, retries=3):
     try:
         event_body = extract_event_body(event)
         validate(event_body, post_events_request_schema)
-        record_list = event_to_record_list(event_body)
     except JSONDecodeError as e:
         log_add(exc_info=e)
         return error_response(400, "Body is not a valid JSON document")
@@ -60,7 +66,44 @@ def post_events(event, context, retries=3):
         log_add(exc_info=e)
         return error_response(400, "JSON document does not conform to the given schema")
 
-    log_add(num_events=len(event_body))
+    return send_events(dataset_id, version, event_body, retries)
+
+
+@logging_wrapper("event-collector")
+@xray_recorder.capture("event_webhook")
+def event_webhook(event, context, retries=3):
+    # Overwrite webhook token in logs
+    log_add(request_query_string_parameters=None)
+
+    token = get_token(event)
+    if token not in webhook_datasets:
+        # Could return 404/403 but that would leak info
+        return error_response(400, "Invalid request")
+
+    dataset_id = webhook_datasets[token]["dataset_id"]
+    version = webhook_datasets[token]["version"]
+    log_add(dataset_id=dataset_id, version=version)
+
+    try:
+        body = json.loads(event["body"])
+    except JSONDecodeError as e:
+        log_add(exc_info=e)
+        return error_response(400, "Body is not a valid JSON document")
+
+    events = [body]
+
+    return send_events(dataset_id, version, events, retries)
+
+
+def get_token(event):
+    try:
+        return event["queryStringParameters"]["token"]
+    except Exception:
+        return None
+
+
+def send_events(dataset_id, version, events, retries=3):
+    log_add(num_events=len(events))
 
     try:
         version_exists = log_duration(
@@ -79,6 +122,7 @@ def post_events(event, context, retries=3):
     log_add(confidentiality=confidentiality, stream_name=stream_name)
 
     try:
+        record_list = event_to_record_list(events)
         kinesis_response, failed_record_list = log_duration(
             lambda: put_records_to_kinesis(record_list, stream_name, retries),
             "kinesis_put_records_duration",
