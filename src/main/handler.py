@@ -13,6 +13,7 @@ from dataplatform.awslambda.logging import (
     logging_wrapper,
     log_add,
     log_duration,
+    log_dynamodb,
     log_exception,
 )
 
@@ -114,21 +115,14 @@ def get_event_webhook(token):
         event_webhook_table = dynamodb.Table("event-webhooks")
 
     key = {"token": token}
-    db_response = log_duration(
-        lambda: event_webhook_table.get_item(Key=key), "dynamodb_duration_ms"
-    )
+    db_response = log_dynamodb(lambda: event_webhook_table.get_item(Key=key))
 
-    status_code = db_response["ResponseMetadata"]["HTTPStatusCode"]
-    log_add(dynamodb_status_code=status_code)
+    item = db_response.get("Item")
+    log_add(dynamodb_item_count=1 if item else 0)
 
-    if "Item" not in db_response:
-        log_add(dynamodb_num_items=0)
-        return None
+    if item:
+        webhooks_cache[token] = item
 
-    log_add(dynamodb_num_items=1)
-    item = db_response["Item"]
-
-    webhooks_cache[token] = item
     return item
 
 
