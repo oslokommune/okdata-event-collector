@@ -9,7 +9,12 @@ from botocore.client import ClientError
 from jsonschema import validate, ValidationError
 
 from auth import SimpleAuth
-from dataplatform.awslambda.logging import logging_wrapper, log_add, log_duration
+from dataplatform.awslambda.logging import (
+    logging_wrapper,
+    log_add,
+    log_duration,
+    log_exception,
+)
 
 from src.main.handler_responses import (
     error_response,
@@ -57,10 +62,10 @@ def post_events(event, context, retries=3):
         event_body = extract_event_body(event)
         validate(event_body, post_events_request_schema)
     except JSONDecodeError as e:
-        log_add(exc_info=e)
+        log_exception(e)
         return error_response(400, "Body is not a valid JSON document")
     except ValidationError as e:
-        log_add(exc_info=e)
+        log_exception(e)
         return error_response(400, "JSON document does not conform to the given schema")
 
     return send_events(dataset_id, version, event_body, retries)
@@ -85,7 +90,7 @@ def event_webhook(event, context, retries=3):
     try:
         body = json.loads(event["body"])
     except JSONDecodeError as e:
-        log_add(exc_info=e)
+        log_exception(e)
         return error_response(400, "Body is not a valid JSON document")
 
     events = [body]
@@ -139,7 +144,7 @@ def send_events(dataset_id, version, events, retries=3):
         if not version_exists:
             return not_found_response(dataset_id, version)
     except ServerErrorException as e:
-        log_add(exc_info=e)
+        log_exception(e)
         return error_response(500, "Internal server error")
 
     confidentiality = metadata_api_client.get_confidentiality(dataset_id)
@@ -153,7 +158,7 @@ def send_events(dataset_id, version, events, retries=3):
             "kinesis_put_records_duration",
         )
     except ClientError as e:
-        log_add(exc_info=e)
+        log_exception(e)
         return error_response(500, "Internal server error")
 
     if len(failed_record_list) > 0:
