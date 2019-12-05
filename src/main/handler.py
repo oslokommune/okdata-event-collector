@@ -24,19 +24,16 @@ post_events_request_schema = None
 metadata_api_url = os.environ["METADATA_API"]
 metadata_api_client = MetadataApiClient(metadata_api_url)
 
+dynamodb = None
+event_webhook_table = None
+webhooks_cache = {}  # Cache webhook config for lifetime of Lambda
+
 ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
 
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
 
 patch_all()
-
-webhook_datasets = {
-    "***REMOVED***": {
-        "dataset_id": "badetemperatur-sensordata-fra-lmc",
-        "version": "1",
-    }
-}
 
 
 @logging_wrapper("event-collector")
@@ -75,13 +72,14 @@ def event_webhook(event, context, retries=3):
     # Overwrite webhook token in logs
     log_add(request_query_string_parameters=None)
 
-    token = get_token(event)
-    if token not in webhook_datasets:
+    token = event.get("queryStringParameters", {}).get("token")
+    webhook = get_event_webhook(token)
+    if not webhook:
         # Could return 404/403 but that would leak info
         return error_response(400, "Invalid request")
 
-    dataset_id = webhook_datasets[token]["dataset_id"]
-    version = webhook_datasets[token]["version"]
+    dataset_id = webhook["datasetId"]
+    version = webhook["version"]
     log_add(dataset_id=dataset_id, version=version)
 
     try:
@@ -95,11 +93,38 @@ def event_webhook(event, context, retries=3):
     return send_events(dataset_id, version, events, retries)
 
 
-def get_token(event):
-    try:
-        return event["queryStringParameters"]["token"]
-    except Exception:
+def get_event_webhook(token):
+    global dynamodb
+    global event_webhook_table
+    global webhooks_cache
+
+    if not token:
         return None
+
+    if token in webhooks_cache:
+        return webhooks_cache[token]
+
+    if not dynamodb:
+        dynamodb = boto3.resource("dynamodb", "eu-west-1")
+        event_webhook_table = dynamodb.Table("event-webhooks")
+
+    key = {"token": token}
+    db_response = log_duration(
+        lambda: event_webhook_table.get_item(Key=key), "dynamodb_duration_ms"
+    )
+
+    status_code = db_response["ResponseMetadata"]["HTTPStatusCode"]
+    log_add(dynamodb_status_code=status_code)
+
+    if "Item" not in db_response:
+        log_add(dynamodb_num_items=0)
+        return None
+
+    log_add(dynamodb_num_items=1)
+    item = db_response["Item"]
+
+    webhooks_cache[token] = item
+    return item
 
 
 def send_events(dataset_id, version, events, retries=3):

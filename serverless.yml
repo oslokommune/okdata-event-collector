@@ -31,6 +31,7 @@ provider:
     CLIENT_SECRET: ${ssm:/dataplatform/apis/event-collector/auth/client_secret~true}
   iamManagedPolicies:
     - 'arn:aws:iam::#{AWS::AccountId}:policy/event-collector-policy'
+    - 'arn:aws:iam::#{AWS::AccountId}:policy/event-webhooks-reader-policy'
     - 'arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess'
 
 functions:
