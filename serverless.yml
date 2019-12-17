@@ -59,7 +59,7 @@ custom:
     usePoetry: false
   esLogs:
     endpoint: ${ssm:/dataplatform/elasticsearch/endpoint}
-    index: event-collector
+    index: dataplatform-services
     filterPattern: '{ $.function_name = "*" }'
   documentation: ${file(serverless/documentation/documentation.yml)}
   deploymentBucket:
