@@ -5,7 +5,6 @@ events:
   - http:
       path: event/{datasetId}/{version}
       method: post
-      private: true
       parameters:
         paths:
           datasetId: true

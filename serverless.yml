@@ -4,10 +4,6 @@ service: event-collector
 
 provider:
   name: aws
-  apiKeys:
-    - ${self:provider.stage}-eventCollectorApiKey
-  apiGateway:
-    apiKeySourceType: HEADER
   runtime: python3.7
   region: ${opt:region, 'eu-west-1'}
   stage: ${opt:stage, 'dev'}
