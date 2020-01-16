@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "2019-11-14T15:49:20Z"
+  version: "2020-01-16T09:22:39Z"
   title: "prod-event-collector"
 host: "api.data.oslo.systems"
 basePath: "/event-collector"
@@ -56,7 +56,6 @@ paths:
             $ref: "#/definitions/standardResponse"
       security:
       - authenticate: []
-      - api_key: []
   /events/{datasetId}/{version}:
     post:
       summary: "Takes a list of events and puts them on a data stream."
@@ -105,17 +104,15 @@ paths:
             $ref: "#/definitions/standardResponse"
       security:
       - authenticate: []
-      - api_key: []
+  /webhook:
+    post:
+      responses: {}
 securityDefinitions:
   authenticate:
     type: "apiKey"
     name: "Authorization"
     in: "header"
     x-amazon-apigateway-authtype: "custom"
-  api_key:
-    type: "apiKey"
-    name: "x-api-key"
-    in: "header"
 definitions:
   postEventRequest:
     type: "object"
