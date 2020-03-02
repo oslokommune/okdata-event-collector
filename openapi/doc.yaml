@@ -1,12 +1,13 @@
 openapi: "3.0.1"
 info:
-  title: "dev-event-collector"
+  title: "event-collector"
   version: "2019-02-21T14:56:42Z"
+  description: "Publish events to data streams in the Origo Data Platform"
+  contact:
+    name: "Origo Dataplatform Team"
+    email: "dataplattform@oslo.kommune.no"
 servers:
-- url: "https://l2hhccv0ij.execute-api.eu-west-1.amazonaws.com/{basePath}"
-  variables:
-    basePath:
-      default: "/dev"
+- url: "https://event-collector.api.oslo.kommune.no"
 paths:
   /event/{datasetId}/{version}:
     post:
