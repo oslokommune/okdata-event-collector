@@ -9,24 +9,35 @@
 .DEV_PROFILE := saml-origo-dev
 .PROD_PROFILE := saml-dataplatform-prod
 
+GLOBAL_PY := python3.7
+BUILD_VENV ?= .build_venv
+BUILD_PY := $(BUILD_VENV)/bin/python
+
 .PHONY: init
-init:
+init: node_modules $(BUILD_VENV)
+
+node_modules: package.json package-lock.json
 	npm install
 
-.PHONY: format
-format:
-	python3 -m black .
+$(BUILD_VENV):
+	$(GLOBAL_PY) -m venv $(BUILD_VENV)
+	$(BUILD_PY) -m pip install -U pip
 
-.PHONY: get-layer-deps
-get-layer-deps:
-	python3 -m pip install --extra-index-url https://artifacts.oslo.kommune.no/repository/itas-pypip/simple dataplatform-base-layer --upgrade
+.PHONY: format
+format: $(BUILD_VENV)/bin/black
+	$(BUILD_PY) -m black .
 
 .PHONY: test
-test:
-	python3 -m tox -p auto
+test: $(BUILD_VENV)/bin/tox
+	$(BUILD_PY) -m tox -p auto -o
+
+.PHONY: upgrade-deps
+upgrade-deps: $(BUILD_VENV)/bin/pip-compile
+	$(BUILD_VENV)/bin/pip-compile -U
 
 .PHONY: deploy
 deploy: init format test login-dev
+	@echo "\nDeploying to stage: $${STAGE:-dev}\n"
 	sls deploy --stage $${STAGE:-dev} --aws-profile $(.DEV_PROFILE)
 
 .PHONY: deploy-prod
@@ -34,9 +45,18 @@ deploy-prod: init format is-git-clean test login-prod
 	sls deploy --stage prod --aws-profile $(.PROD_PROFILE)
 	sls downloadDocumentation --outputFileName swagger.yaml --stage prod --aws-profile $(.PROD_PROFILE)
 
+ifeq ($(MAKECMDGOALS),undeploy)
+ifndef STAGE
+$(error STAGE is not set)
+endif
+ifeq ($(STAGE),dev)
+$(error Please do not undeploy dev)
+endif
+endif
 .PHONY: undeploy
 undeploy: login-dev
-	sls remove --stage $${STAGE} --aws-profile $(.DEV_PROFILE)
+	@echo "\nUndeploying stage: $(STAGE)\n"
+	sls remove --stage $(STAGE) --aws-profile $(.DEV_PROFILE)
 
 .PHONY: login-dev
 login-dev:
@@ -55,14 +75,17 @@ is-git-clean:
 		false; \
 	fi
 
-.PHONY: update-ssm-dev
-update-ssm-dev:
-	url=$$(sls info --stage dev --aws-profile $(.DEV_PROFILE) --verbose | grep ServiceEndpoint | cut -d' ' -f2) &&\
-	aws --region eu-west-1 --profile $(.DEV_PROFILE) ssm put-parameter --overwrite \
-	--cli-input-json "{\"Type\": \"String\", \"Name\": \"/dataplatform/event-collector/url\", \"Value\": \"$$url\"}"
 
-.PHONY: update-ssm-prod
-update-ssm-prod:
-	url=$$(sls info --stage prod --aws-profile $(.PROD_PROFILE) --verbose | grep ServiceEndpoint | cut -d' ' -f2) &&\
-	aws --region eu-west-1 --profile $(.PROD_PROFILE) ssm put-parameter --overwrite \
-	--cli-input-json "{\"Type\": \"String\", \"Name\": \"/dataplatform/event-collector/url\", \"Value\": \"$$url\"}"
+###
+# Python build dependencies
+##
+
+$(BUILD_VENV)/bin/pip-compile: $(BUILD_VENV)
+	$(BUILD_PY) -m pip install -U pip-tools
+
+$(BUILD_VENV)/bin/tox: $(BUILD_VENV)
+	$(BUILD_PY) -m pip install -I virtualenv==16.7.9
+	$(BUILD_PY) -m pip install -U tox
+
+$(BUILD_VENV)/bin/%: $(BUILD_VENV)
+	$(BUILD_PY) -m pip install -U $*
