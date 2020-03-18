@@ -1,4 +1,4 @@
-frameworkVersion: ">=1.50.0 <2.0.0"
+frameworkVersion: ">=1.64.0 <2.0.0"
 
 service: event-collector
 
@@ -25,6 +25,7 @@ provider:
     KEYCLOAK_REALM: api-catalog
     CLIENT_ID: event-collector
     CLIENT_SECRET: ${ssm:/dataplatform/apis/event-collector/auth/client_secret~true}
+  rolePermissionsBoundary: "arn:aws:iam::#{AWS::AccountId}:policy/oslokommune/oslokommune-boundary"
   iamManagedPolicies:
     - 'arn:aws:iam::#{AWS::AccountId}:policy/event-collector-policy'
     - 'arn:aws:iam::#{AWS::AccountId}:policy/event-webhooks-reader-policy'
