@@ -42,14 +42,11 @@ with open("serverless/documentation/schemas/postEventsRequest.json") as f:
 patch_all()
 
 
-@logging_wrapper("event-collector")
+@logging_wrapper
 @xray_recorder.capture("post_events")
 def post_events(event, context, retries=3):
 
-    dataset_id, version = (
-        event["pathParameters"]["datasetId"],
-        event["pathParameters"]["version"],
-    )
+    dataset_id, version = extract_path_parameters(event)
     log_add(dataset_id=dataset_id, version=version)
 
     log_add(enable_auth=ENABLE_AUTH)
@@ -59,22 +56,40 @@ def post_events(event, context, retries=3):
         if not is_owner:
             return error_response(403, "Forbidden")
 
-    try:
-        event_body = extract_event_body(event)
-        validate(event_body, post_events_request_schema)
-    except JSONDecodeError as e:
-        log_exception(e)
-        return error_response(400, "Body is not a valid JSON document")
-    except ValidationError as e:
-        log_exception(e)
-        return error_response(400, "JSON document does not conform to the given schema")
+    event_body, validation_error_msg = validate_event_body(event)
+
+    if validation_error_msg:
+        return error_response(400, validation_error_msg)
 
     return send_events(dataset_id, version, event_body, retries)
 
 
-@logging_wrapper("event-collector")
-@xray_recorder.capture("event_webhook")
-def event_webhook(event, context, retries=3):
+@logging_wrapper
+@xray_recorder.capture("events_webhook")
+def events_webhook(event, context, retries=3):
+
+    dataset_id, version = extract_path_parameters(event)
+    webhook_token = event.get("queryStringParameters", {}).get("token")
+    log_add(dataset_id=dataset_id, version=version)
+
+    has_access, forbidden_msg = SimpleAuth().webhook_token_is_authorized(
+        webhook_token, dataset_id
+    )
+
+    if not has_access:
+        return {"statusCode": 403, "body": json.dumps({"message": forbidden_msg})}
+
+    event_body, validation_error_msg = validate_event_body(event)
+
+    if validation_error_msg:
+        return error_response(400, validation_error_msg)
+
+    return send_events(dataset_id, version, event_body, retries)
+
+
+@logging_wrapper
+@xray_recorder.capture("event_webhook_legacy")
+def event_webhook_legacy(event, context, retries=3):
     # Overwrite webhook token in logs
     log_add(request_query_string_parameters=None)
 
@@ -204,3 +219,28 @@ def event_to_record_list(event_body):
         )
 
     return record_list
+
+
+def validate_event_body(lambda_event):
+    try:
+        event_body = extract_event_body(lambda_event)
+        validate(event_body, post_events_request_schema)
+        return event_body, None
+    except JSONDecodeError as e:
+        log_exception(e)
+        return None, "Body is not a valid JSON document"
+    except ValidationError as e:
+        log_exception(e)
+        return None, "JSON document does not conform to the given schema"
+
+
+# https://jira.oslo.kommune.no/browse/DP-692
+def extract_path_parameters(lambda_event):
+    version = lambda_event["pathParameters"]["version"]
+
+    # TODO: Replace get with default None, and remove if-condition after https://jira.oslo.kommune.no/browse/DP-692, Oyvind Nygard 25-03-2020
+    dataset_id = lambda_event["pathParameters"].get("dataset_id", None)
+    if not dataset_id:
+        dataset_id = lambda_event["pathParameters"]["datasetId"]
+
+    return dataset_id, version

@@ -1,4 +1,4 @@
-handler: src/main/handler.event_webhook
+handler: src/main/handler.event_webhook_legacy
 layers:
   - ${ssm:/dataplatform/python-base-lambda-layer/arn}
 events:
@@ -8,3 +8,4 @@ events:
       parameters:
         querystrings:
           token: true
+

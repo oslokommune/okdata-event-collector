@@ -2,6 +2,7 @@ import unittest
 from mock import patch
 import boto3
 import json
+from auth import SimpleAuth
 import src.main.handler as handler
 import src.tests.test_data.event_to_record_data as event_to_record_data
 import src.tests.test_data.get_failed_records_data as get_failed_records_data
@@ -236,6 +237,22 @@ class Tester(unittest.TestCase):
         self.assertListEqual(
             event_body_2, extract_event_body_test_data.expected_event_body
         )
+
+    @patch.object(SimpleAuth, "webhook_token_is_authorized")
+    def test_post_events_webhook_auth_forbidden(self, auth_mock):
+        access_denied_token = "access-denied-token"
+
+        auth_mock.return_value = False, "Forbidden"
+
+        event_access_denied = {
+            "pathParameters": {"dataset_id": "datasetId", "version": "version"},
+            "queryStringParameters": {"token": access_denied_token},
+            "body": '{"kake": "parmesan"}',
+        }
+
+        forbidden_response = handler.events_webhook(event_access_denied, {})
+        assert forbidden_response["statusCode"] == 403
+        assert forbidden_response["body"] == '{"message": "Forbidden"}'
 
 
 if __name__ == "__main__":

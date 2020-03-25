@@ -1,0 +1,41 @@
+summary: Takes a list of events and puts them on a data stream.
+description: Takes a list of events and puts them on a data stream.
+pathParams:
+  -
+    name: dataset_id
+    description: Identifier for destination dataset
+    required: true
+  -
+    name: version
+    description: Version for destination dataset
+    required: true
+queryParams:
+  -
+    name: token
+    description: webhook token
+    required: true
+requestBody:
+  description: Array of json objects.
+requestModels:
+  "application/json": postEventsRequest
+methodResponses:
+  -
+    statusCode: '200'
+    responseModels:
+      "application/json": standardResponse
+  -
+    statusCode: '400'
+    responseModels:
+      "application/json": standardResponse
+  -
+    statusCode: '403'
+    responseModels:
+      "application/json": standardResponse
+  -
+    statusCode: '404'
+    responseModels:
+      "application/json": standardResponse
+  -
+    statusCode: '500'
+    responseModels:
+      "application/json": serverError

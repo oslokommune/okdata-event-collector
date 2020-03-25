@@ -1,4 +1,4 @@
-version: 0.7.0
+version: ${git:sha1}
 summary: Api for sending events to the data platform.
 description: Entrypoint to the data platform.
 models:

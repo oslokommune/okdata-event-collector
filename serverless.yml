@@ -25,6 +25,7 @@ provider:
     KEYCLOAK_REALM: api-catalog
     CLIENT_ID: event-collector
     CLIENT_SECRET: ${ssm:/dataplatform/apis/event-collector/auth/client_secret~true}
+    SERVICE_NAME: ${self:service}
   rolePermissionsBoundary: "arn:aws:iam::#{AWS::AccountId}:policy/oslokommune/oslokommune-boundary"
   iamManagedPolicies:
     - 'arn:aws:iam::#{AWS::AccountId}:policy/event-collector-policy'
@@ -34,7 +35,9 @@ provider:
 functions:
   postEvents: ${file(serverless/functions/postEvents.yml)}
   postEvent: ${file(serverless/functions/postEvent.yml)}
-  eventWebhook: ${file(serverless/functions/eventWebhook.yml)}
+  event_webhook_legacy: ${file(serverless/functions/eventWebhook.yml)}
+  event_webhook: ${file(serverless/functions/post-event-webhook-auth.yml)}
+  events_webhook: ${file(serverless/functions/post-events-webhook-auth.yml)}
 
 package:
   exclude:
