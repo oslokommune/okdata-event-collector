@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "2020-01-16T09:22:39Z"
+  version: "2020-03-25T12:55:13Z"
   title: "prod-event-collector"
 host: "api.data.oslo.systems"
 basePath: "/event-collector"
@@ -107,6 +107,108 @@ paths:
   /webhook:
     post:
       responses: {}
+  /webhook/event/{dataset_id}/{version}:
+    post:
+      summary: "Takes a single event and puts it on a data stream."
+      description: "Takes a single event and puts it on a data stream."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "version"
+        in: "path"
+        description: "Version for destination dataset"
+        required: true
+        type: "string"
+      - name: "token"
+        in: "query"
+        description: "webhook token"
+        required: true
+        type: "string"
+      - name: "dataset_id"
+        in: "path"
+        description: "Identifier for destination dataset"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "postEventRequest"
+        description: "An arbitrary json object."
+        required: true
+        schema:
+          $ref: "#/definitions/postEventRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+        400:
+          description: "400 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+        500:
+          description: "500 response"
+          schema:
+            $ref: "#/definitions/serverError"
+        403:
+          description: "403 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+        404:
+          description: "404 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+  /webhook/events/{dataset_id}/{version}:
+    post:
+      summary: "Takes a list of events and puts them on a data stream."
+      description: "Takes a list of events and puts them on a data stream."
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - name: "version"
+        in: "path"
+        description: "Version for destination dataset"
+        required: true
+        type: "string"
+      - name: "token"
+        in: "query"
+        description: "webhook token"
+        required: true
+        type: "string"
+      - name: "dataset_id"
+        in: "path"
+        description: "Identifier for destination dataset"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "postEventsRequest"
+        description: "Array of json objects."
+        required: true
+        schema:
+          $ref: "#/definitions/postEventsRequest"
+      responses:
+        200:
+          description: "200 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+        400:
+          description: "400 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+        500:
+          description: "500 response"
+          schema:
+            $ref: "#/definitions/serverError"
+        403:
+          description: "403 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
+        404:
+          description: "404 response"
+          schema:
+            $ref: "#/definitions/standardResponse"
 securityDefinitions:
   authenticate:
     type: "apiKey"
