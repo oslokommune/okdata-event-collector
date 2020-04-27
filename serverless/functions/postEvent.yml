@@ -1,4 +1,4 @@
-handler: src/main/handler.post_events
+handler: event_collector/handler.post_events
 layers:
   - ${ssm:/dataplatform/python-base-lambda-layer/arn}
 events:

@@ -43,7 +43,7 @@ package:
   exclude:
     - "**/*"
   include:
-    - "src/main/*.py"
+    - "event_collector/*.py"
     - "serverless/documentation/schemas/*.json"
 
 plugins:

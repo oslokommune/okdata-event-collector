@@ -3,7 +3,7 @@ import requests_mock
 import json
 from requests.exceptions import RequestException
 from unittest.mock import patch
-from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
+from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
 
 from aws_xray_sdk.core import xray_recorder
 

@@ -17,13 +17,13 @@ from dataplatform.awslambda.logging import (
     log_exception,
 )
 
-from src.main.handler_responses import (
+from event_collector.handler_responses import (
     error_response,
     not_found_response,
     failed_elements_response,
     ok_response,
 )
-from src.main.metadata_api_client import MetadataApiClient, ServerErrorException
+from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
 
 post_events_request_schema = None
 

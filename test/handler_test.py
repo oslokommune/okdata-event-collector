@@ -3,11 +3,11 @@ from mock import patch
 import boto3
 import json
 from auth import SimpleAuth
-import src.main.handler as handler
-import src.tests.test_data.event_to_record_data as event_to_record_data
-import src.tests.test_data.get_failed_records_data as get_failed_records_data
-import src.tests.test_data.post_event_data as post_event_data
-import src.tests.test_data.extract_event_body_test_data as extract_event_body_test_data
+import event_collector.handler as handler
+import test.test_data.event_to_record_data as event_to_record_data
+import test.test_data.get_failed_records_data as get_failed_records_data
+import test.test_data.post_event_data as post_event_data
+import test.test_data.extract_event_body_test_data as extract_event_body_test_data
 import requests_mock
 from moto import mock_kinesis
 
@@ -114,7 +114,7 @@ class Tester(unittest.TestCase):
 
         self.assertDictEqual(post_event_response, post_event_data.ok_response)
 
-    @patch("src.main.handler.put_records_to_kinesis")
+    @patch("event_collector.handler.put_records_to_kinesis")
     @requests_mock.Mocker()
     def test_post_evenst_failed_records(self, put_records_mock, request_mocker):
         mock_auth(request_mocker, access=True)
