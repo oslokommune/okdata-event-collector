@@ -35,7 +35,6 @@ provider:
 functions:
   postEvents: ${file(serverless/functions/postEvents.yml)}
   postEvent: ${file(serverless/functions/postEvent.yml)}
-  event_webhook_legacy: ${file(serverless/functions/eventWebhook.yml)}
   event_webhook: ${file(serverless/functions/post-event-webhook-auth.yml)}
   events_webhook: ${file(serverless/functions/post-events-webhook-auth.yml)}
 
