@@ -29,7 +29,6 @@ provider:
   rolePermissionsBoundary: "arn:aws:iam::#{AWS::AccountId}:policy/oslokommune/oslokommune-boundary"
   iamManagedPolicies:
     - 'arn:aws:iam::#{AWS::AccountId}:policy/event-collector-policy'
-    - 'arn:aws:iam::#{AWS::AccountId}:policy/event-webhooks-reader-policy'
     - 'arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess'
 
 functions:
