@@ -1,7 +1,7 @@
 ---
 swagger: "2.0"
 info:
-  version: "2020-05-05T08:05:38Z"
+  version: "2020-06-22T10:29:26Z"
   title: "prod-event-collector"
 host: "api.data.oslo.systems"
 basePath: "/event-collector"
@@ -104,9 +104,6 @@ paths:
             $ref: "#/definitions/standardResponse"
       security:
       - authenticate: []
-  /webhook:
-    post:
-      responses: {}
   /webhook/event/{dataset_id}/{version}:
     post:
       summary: "Takes a single event and puts it on a data stream."
