@@ -1,14 +1,26 @@
 import json
 
-datasetId = "d123"
+dataset_id = "d123"
 version = "1"
+confidentiality = "green"
+stream_name = f"dp.{confidentiality}.{dataset_id}.incoming.{version}.json"
+dataset_id_not_found = "abcde"
+dataset_id_server_error = "what-is-up-with-this-dataset"
+access_token = "access-token"
+access_token_access_denied = "access-token-denied"
+webhook_token_access_denied = "webhook-token-access-denied"
 
-user_id = "user-1"
 
-get_dataset_versions_route = f"datasets/{datasetId}/versions/"
+get_dataset_versions_route = f"datasets/{dataset_id}/versions/{version}"
+get_dataset_versions_not_exist_route = (
+    f"datasets/{dataset_id_not_found}/versions/{version}"
+)
+get_dataset_versions_route_server_error = (
+    f"datasets/{dataset_id_server_error}/versions/{version}"
+)
 
 event_with_list = {
-    "pathParameters": {"datasetId": datasetId, "version": version},
+    "pathParameters": {"datasetId": dataset_id, "version": version},
     "body": json.dumps(
         [
             {"key00": "value00"},
@@ -17,13 +29,37 @@ event_with_list = {
             {"key30": "value30"},
         ]
     ),
-    "headers": {"Authorization": f"Bearer {user_id}"},
+    "headers": {"Authorization": f"Bearer {access_token}"},
 }
 
 event_with_object = {
-    "pathParameters": {"datasetId": datasetId, "version": version},
+    "pathParameters": {"datasetId": dataset_id, "version": version},
     "body": json.dumps({"key00": "value00"}),
-    "headers": {"Authorization": f"Bearer {user_id}"},
+    "headers": {"Authorization": f"Bearer {access_token}"},
+}
+
+event_not_found = {
+    "pathParameters": {"datasetId": dataset_id_not_found, "version": version},
+    "body": json.dumps({"key00": "value00"}),
+    "headers": {"Authorization": f"Bearer {access_token_access_denied}"},
+}
+
+event_access_denied = {
+    "pathParameters": {"datasetId": dataset_id, "version": version},
+    "body": json.dumps({"key00": "value00"}),
+    "headers": {"Authorization": f"Bearer {access_token_access_denied}"},
+}
+
+event_server_error = {
+    "pathParameters": {"datasetId": dataset_id_server_error, "version": version},
+    "body": json.dumps({"key00": "value00"}),
+    "headers": {"Authorization": f"Bearer {access_token_access_denied}"},
+}
+
+webhook_event_access_denied = {
+    "pathParameters": {"datasetId": dataset_id, "version": version},
+    "body": json.dumps({"key00": "value00"}),
+    "queryStringParameters": {"token": webhook_token_access_denied},
 }
 
 ok_response = {"statusCode": 200, "body": json.dumps({"message": "Ok"})}
@@ -36,7 +72,9 @@ failed_record_list = [
 not_found_response = {
     "statusCode": 404,
     "body": json.dumps(
-        {"message": f"Dataset with id:{datasetId} and version:{version} does not exist"}
+        {
+            "message": f"Dataset with id:{dataset_id_not_found} and version:{version} does not exist"
+        }
     ),
 }
 
@@ -47,9 +85,9 @@ error_response = {
 
 
 decode_error_event = {
-    "pathParameters": {"datasetId": datasetId, "version": version},
+    "pathParameters": {"datasetId": dataset_id, "version": version},
     "body": "{",
-    "headers": {"Authorization": f"Bearer {user_id}"},
+    "headers": {"Authorization": f"Bearer {access_token}"},
 }
 
 decode_error_response = {
@@ -58,15 +96,15 @@ decode_error_response = {
 }
 
 validation_error_event_1 = {
-    "pathParameters": {"datasetId": datasetId, "version": version},
+    "pathParameters": {"datasetId": dataset_id, "version": version},
     "body": '"value"',
-    "headers": {"Authorization": f"Bearer {user_id}"},
+    "headers": {"Authorization": f"Bearer {access_token}"},
 }
 
 validation_error_event_2 = {
-    "pathParameters": {"datasetId": datasetId, "version": version},
+    "pathParameters": {"datasetId": dataset_id, "version": version},
     "body": '["value"]',
-    "headers": {"Authorization": f"Bearer {user_id}"},
+    "headers": {"Authorization": f"Bearer {access_token}"},
 }
 
 validation_error_response = {

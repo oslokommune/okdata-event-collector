@@ -1,8 +1,5 @@
-import unittest
-import requests_mock
+import pytest
 import json
-from requests.exceptions import RequestException
-from unittest.mock import patch
 from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
 
 from aws_xray_sdk.core import xray_recorder
@@ -14,89 +11,56 @@ metadata_api_response_body = [
 ]
 
 
-class Tester(unittest.TestCase):
-
-    TEST_URL = "https://test.com"
-
-    @requests_mock.Mocker()
-    def test_version_exists(self, request_mocker):
-        dataset_id, version = "d123", "1"
-
-        url_with_path_params = f"{self.TEST_URL}/datasets/{dataset_id}/versions/"
-
-        metadata_api_client = MetadataApiClient(self.TEST_URL)
-
-        request_mocker.register_uri(
-            "GET",
-            url_with_path_params,
-            text=json.dumps(metadata_api_response_body),
-            status_code=200,
-        )
-
-        response = metadata_api_client.version_exists(dataset_id, version)
-
-        self.assertEqual(True, response)
-
-    @requests_mock.Mocker()
-    def test_version_exists_dataset_not_found(self, request_mocker):
-        dataset_id, version = "d123", "1"
-
-        url_with_path_params = f"{self.TEST_URL}/datasets/{dataset_id}/versions/"
-
-        metadata_api_client = MetadataApiClient(self.TEST_URL)
-
-        request_mocker.register_uri(
-            "GET", url_with_path_params, text="Not found", status_code=404
-        )
-
-        response = metadata_api_client.version_exists(dataset_id, version)
-
-        self.assertEqual(False, response)
-
-    @requests_mock.Mocker()
-    def test_version_exists_version_not_found(self, request_mocker):
-        dataset_id, version_not_exist = "d123", "2"
-
-        url_with_path_params = f"{self.TEST_URL}/datasets/{dataset_id}/versions/"
-
-        metadata_api_client = MetadataApiClient(self.TEST_URL)
-
-        request_mocker.register_uri(
-            "GET",
-            url_with_path_params,
-            text=json.dumps(metadata_api_response_body),
-            status_code=200,
-        )
-
-        response = metadata_api_client.version_exists(dataset_id, version_not_exist)
-
-        self.assertEqual(False, response)
-
-    @requests_mock.Mocker()
-    def test_version_exists_server_error(self, request_mocker):
-        dataset_id, version = "d123", "1"
-
-        url_with_path_params = f"{self.TEST_URL}/datasets/{dataset_id}/versions/"
-
-        metadata_api_client = MetadataApiClient(self.TEST_URL)
-
-        request_mocker.register_uri(
-            "GET", url_with_path_params, text="Server Error", status_code=500
-        )
-
-        with self.assertRaises(ServerErrorException):
-            metadata_api_client.version_exists(dataset_id, version)
-
-    @patch("requests.get")
-    def test_version_exists_request_exception(self, get_mock):
-        dataset_id, version = "d123", "1"
-        get_mock.side_effect = RequestException()
-
-        metadata_api_client = MetadataApiClient(self.TEST_URL)
-
-        with self.assertRaises(ServerErrorException):
-            metadata_api_client.version_exists(dataset_id, version)
+TEST_URL = "https://test.com"
 
 
-if __name__ == "__main__":
-    unittest.main()
+def test_version_exists(requests_mock):
+    dataset_id, version = "d123", "1"
+
+    url_with_path_params = f"{TEST_URL}/datasets/{dataset_id}/versions/{version}"
+
+    metadata_api_client = MetadataApiClient(TEST_URL)
+
+    requests_mock.register_uri(
+        "GET",
+        url_with_path_params,
+        text=json.dumps(metadata_api_response_body),
+        status_code=200,
+    )
+
+    version_exists = metadata_api_client.version_exists(dataset_id, version)
+
+    assert version_exists
+
+
+def test_version_exists_not_found(requests_mock):
+    dataset_id, version = "d123", "1"
+
+    url_with_path_params = f"{TEST_URL}/datasets/{dataset_id}/versions/{version}"
+
+    metadata_api_client = MetadataApiClient(TEST_URL)
+
+    requests_mock.register_uri(
+        "GET", url_with_path_params, text="Not found", status_code=404
+    )
+
+    version_exists = metadata_api_client.version_exists(dataset_id, version)
+    assert not version_exists
+
+
+def test_version_exists_server_error(requests_mock):
+    dataset_id, version = "d123", "1"
+
+    url_with_path_params = f"{TEST_URL}/datasets/{dataset_id}/versions/{version}"
+
+    metadata_api_client = MetadataApiClient(TEST_URL)
+
+    requests_mock.register_uri(
+        "GET",
+        url_with_path_params,
+        text=json.dumps({"message": "Server Error"}),
+        status_code=500,
+    )
+
+    with pytest.raises(ServerErrorException):
+        metadata_api_client.version_exists(dataset_id, version)

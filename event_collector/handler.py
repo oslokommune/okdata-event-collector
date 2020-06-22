@@ -2,7 +2,6 @@ import os
 import uuid
 import json
 from json.decoder import JSONDecodeError
-
 from aws_xray_sdk.core import patch_all, xray_recorder
 import boto3
 from botocore.client import ClientError
@@ -48,9 +47,16 @@ def post_events(event, context, retries=3):
     dataset_id, version = extract_path_parameters(event)
     log_add(dataset_id=dataset_id, version=version)
 
+    try:
+        if not metadata_api_client.version_exists(dataset_id, version):
+            return not_found_response(dataset_id, version)
+    except ServerErrorException:
+        return error_response(500, "Internal server error")
+
     log_add(enable_auth=ENABLE_AUTH)
     if ENABLE_AUTH:
-        is_owner = SimpleAuth().is_owner(event, dataset_id)
+        access_token = event["headers"]["Authorization"].split(" ")[-1]
+        is_owner = SimpleAuth().is_authorized(access_token, dataset_id)
         log_add(is_owner=is_owner)
         if not is_owner:
             return error_response(403, "Forbidden")
@@ -71,6 +77,12 @@ def events_webhook(event, context, retries=3):
     webhook_token = event.get("queryStringParameters", {}).get("token")
     log_add(dataset_id=dataset_id, version=version)
 
+    try:
+        if not metadata_api_client.version_exists(dataset_id, version):
+            return not_found_response(dataset_id, version)
+    except ServerErrorException:
+        return error_response(500, "Internal server error")
+
     has_access, forbidden_msg = SimpleAuth().webhook_token_is_authorized(
         webhook_token, dataset_id
     )
@@ -88,18 +100,6 @@ def events_webhook(event, context, retries=3):
 
 def send_events(dataset_id, version, events, retries=3):
     log_add(num_events=len(events))
-
-    try:
-        version_exists = log_duration(
-            lambda: metadata_api_client.version_exists(dataset_id, version),
-            "metadata_version_exists_duration",
-        )
-        log_add(version_exists=version_exists)
-        if not version_exists:
-            return not_found_response(dataset_id, version)
-    except ServerErrorException as e:
-        log_exception(e)
-        return error_response(500, "Internal server error")
 
     confidentiality = metadata_api_client.get_confidentiality(dataset_id)
     stream_name = f"dp.{confidentiality}.{dataset_id}.incoming.{version}.json"
