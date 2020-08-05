@@ -24,7 +24,7 @@ provider:
     KEYCLOAK_SERVER: ${ssm:/keycloak/client/server}
     KEYCLOAK_REALM: api-catalog
     CLIENT_ID: event-collector
-    CLIENT_SECRET: ${ssm:/dataplatform/apis/event-collector/auth/client_secret~true}
+    CLIENT_SECRET: ${ssm:/dataplatform/${self:service.name}/keycloak-client-secret~true}
     SERVICE_NAME: ${self:service}
   rolePermissionsBoundary: "arn:aws:iam::#{AWS::AccountId}:policy/oslokommune/oslokommune-boundary"
   iamManagedPolicies:
