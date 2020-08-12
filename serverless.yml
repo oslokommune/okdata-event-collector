@@ -18,10 +18,10 @@ provider:
     GIT_REV: ${git:branch}:${git:sha1}
   environment:
     GIT_REV: ${git:branch}:${git:sha1}
-    METADATA_API: ${ssm:/dataplatform/metadata-api/url}
-    AUTHORIZER_API: ${ssm:/dataplatform/simple-dataset-authorizer/url}
+    METADATA_API: ${ssm:/dataplatform/shared/api-gateway-url}/metadata
+    AUTHORIZER_API: ${ssm:/dataplatform/shared/api-gateway-url}/simple-dataset-authorizer
     ENABLE_AUTH: true
-    KEYCLOAK_SERVER: ${ssm:/keycloak/client/server}
+    KEYCLOAK_SERVER: ${ssm:/dataplatform/shared/keycloak-server-url}
     KEYCLOAK_REALM: api-catalog
     CLIENT_ID: event-collector
     CLIENT_SECRET: ${ssm:/dataplatform/${self:service.name}/keycloak-client-secret~true}
@@ -56,7 +56,7 @@ custom:
     dockerizePip: non-linux
     usePoetry: false
   esLogs:
-    endpoint: ${ssm:/dataplatform/elasticsearch/endpoint}
+    endpoint: ${ssm:/dataplatform/shared/elasticsearch-endpoint}
     index: dataplatform-services
     filterPattern: '{ $.function_name = "*" }'
   documentation: ${file(serverless/documentation/documentation.yml)}
