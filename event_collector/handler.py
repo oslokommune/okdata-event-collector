@@ -25,7 +25,7 @@ from event_collector.metadata_api_client import MetadataApiClient, ServerErrorEx
 
 post_events_request_schema = None
 
-metadata_api_url = os.environ["METADATA_API"]
+metadata_api_url = os.environ["METADATA_API_URL"]
 metadata_api_client = MetadataApiClient(metadata_api_url)
 
 dynamodb = None
