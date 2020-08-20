@@ -1,5 +1,4 @@
 import pytest
-import boto3
 import json
 from auth import SimpleAuth
 import event_collector.handler as handler
@@ -7,7 +6,8 @@ import test.test_data.event_to_record_data as event_to_record_data
 import test.test_data.get_failed_records_data as get_failed_records_data
 import test.test_data.post_event_data as post_event_data
 import test.test_data.extract_event_body_test_data as extract_event_body_test_data
-from moto import mock_kinesis
+from test.test_utils import create_event_stream, create_event_streams_table
+from moto import mock_kinesis, mock_dynamodb2
 
 
 from aws_xray_sdk.core import xray_recorder
@@ -31,9 +31,8 @@ def test_get_failed_records():
 
 @mock_kinesis
 def test_put_records_to_kinesis():
-    conn = boto3.client("kinesis", region_name="eu-west-1")
     stream_name = "test_stream"
-    conn.create_stream(StreamName=stream_name, ShardCount=1)
+    create_event_stream(stream_name)
     record_list = []
     for i in range(100):
         record_list.append(
@@ -48,24 +47,24 @@ def test_put_records_to_kinesis():
 
 
 @mock_kinesis
-def test_post_events(metadata_api, simple_auth):
-    conn = boto3.client("kinesis", region_name="eu-west-1")
+def test_post_events(metadata_api, simple_auth, mock_stream_name):
     stream_name = post_event_data.stream_name
-    conn.create_stream(StreamName=stream_name, ShardCount=1)
+    create_event_stream(stream_name)
     post_event_response = handler.post_events(post_event_data.event_with_list, {})
     assert post_event_response == post_event_data.ok_response
 
 
 @mock_kinesis
-def test_post_single_event(metadata_api, simple_auth):
-    conn = boto3.client("kinesis", region_name="eu-west-1")
+def test_post_single_event(metadata_api, simple_auth, mock_stream_name):
     stream_name = post_event_data.stream_name
-    conn.create_stream(StreamName=stream_name, ShardCount=1)
+    create_event_stream(stream_name)
     post_event_response = handler.post_events(post_event_data.event_with_object, {})
     assert post_event_response == post_event_data.ok_response
 
 
-def test_post_events_failed_records(metadata_api, simple_auth, failed_records):
+def test_post_events_failed_records(
+    metadata_api, simple_auth, failed_records, mock_stream_name
+):
     post_event_response = handler.post_events(post_event_data.event_with_list, {})
     expected_response = {
         "statusCode": 500,
@@ -85,10 +84,9 @@ def test_post_events_metadata_server_error(metadata_api, simple_auth):
 
 
 @mock_kinesis
-def test_post_events_client_error(metadata_api, simple_auth):
-    conn = boto3.client("kinesis", region_name="eu-west-1")
+def test_post_events_client_error(metadata_api, simple_auth, mock_stream_name):
     stream_name = "dp.green.dataset-123.incoming.version-123.json"
-    conn.create_stream(StreamName=stream_name, ShardCount=1)
+    create_event_stream(stream_name)
     post_event_response = handler.post_events(post_event_data.event_with_list, {})
     assert post_event_response == post_event_data.error_response
 
@@ -133,6 +131,29 @@ def test_post_events_webhook_auth_forbidden(metadata_api, simple_auth):
     )
     assert forbidden_response["statusCode"] == 403
     assert forbidden_response["body"] == '{"message": "Forbidden"}'
+
+
+def test_stream_name_identification(mock_dynamodb):
+    table = create_event_streams_table()
+    stream_name = handler.identify_stream_name(
+        post_event_data.dataset_id,
+        post_event_data.version,
+        post_event_data.confidentiality,
+    )
+    assert stream_name == post_event_data.stream_name
+
+    table.put_item(
+        Item={
+            "id": f"{post_event_data.dataset_id}/{post_event_data.version}",
+            "config_version": 2,
+        }
+    )
+    stream_name = handler.identify_stream_name(
+        post_event_data.dataset_id,
+        post_event_data.version,
+        post_event_data.confidentiality,
+    )
+    assert stream_name == post_event_data.stream_name_raw
 
 
 @pytest.fixture()
@@ -190,3 +211,16 @@ def failed_records(monkeypatch):
         return "", post_event_data.failed_record_list
 
     monkeypatch.setattr(handler, "put_records_to_kinesis", failed_records)
+
+
+@pytest.fixture()
+def mock_stream_name(monkeypatch):
+    def identify_stream_name(dataset_id, version, confidentiality):
+        return f"dp.{confidentiality}.{dataset_id}.incoming.{version}.json"
+
+    monkeypatch.setattr(handler, "identify_stream_name", identify_stream_name)
+
+
+@pytest.fixture(scope="function")
+def mock_dynamodb():
+    mock_dynamodb2().start()

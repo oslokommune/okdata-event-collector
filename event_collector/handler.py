@@ -4,6 +4,7 @@ import json
 from json.decoder import JSONDecodeError
 from aws_xray_sdk.core import patch_all, xray_recorder
 import boto3
+from boto3.dynamodb.conditions import Key
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
 
@@ -22,6 +23,7 @@ from event_collector.handler_responses import (
     ok_response,
 )
 from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
+
 
 post_events_request_schema = None
 
@@ -102,7 +104,7 @@ def send_events(dataset_id, version, events, retries=3):
     log_add(num_events=len(events))
 
     confidentiality = metadata_api_client.get_confidentiality(dataset_id)
-    stream_name = f"dp.{confidentiality}.{dataset_id}.incoming.{version}.json"
+    stream_name = identify_stream_name(dataset_id, version, confidentiality)
     log_add(confidentiality=confidentiality, stream_name=stream_name)
 
     try:
@@ -128,6 +130,30 @@ def extract_event_body(event):
         return [body]
     else:
         return body
+
+
+def get_event_stream(event_stream_id):
+    table_name = "event-streams"
+    dynamodb = boto3.resource("dynamodb", region_name="eu-west-1")
+    table = dynamodb.Table(table_name)
+
+    event_stream_items = table.query(
+        IndexName="by_id", KeyConditionExpression=Key("id").eq(event_stream_id)
+    )["Items"]
+
+    if event_stream_items:
+        current_item = max(event_stream_items, key=lambda item: item["config_version"])
+        return current_item
+
+
+def identify_stream_name(dataset_id, version, confidentiality):
+    stage = "incoming"
+    event_stream = get_event_stream(f"{dataset_id}/{version}")
+
+    if event_stream:
+        stage = "raw"
+
+    return f"dp.{confidentiality}.{dataset_id}.{stage}.{version}.json"
 
 
 def put_records_to_kinesis(record_list, stream_name, retries):
