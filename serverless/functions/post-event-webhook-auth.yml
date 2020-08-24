@@ -1,6 +1,6 @@
 handler: event_collector/handler.events_webhook
 layers:
-  - ${ssm:/dataplatform/python-base-lambda-layer/arn}
+  - ${ssm:/dataplatform/shared/python-base-layer-arn}
 events:
   - http:
       path: webhook/event/{dataset_id}/{version}
@@ -12,4 +12,3 @@ events:
         querystrings:
           token: true
       documentation: ${file(serverless/documentation/post-event-webhook-auth.yml)}
-
