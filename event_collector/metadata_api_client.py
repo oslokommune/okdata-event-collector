@@ -12,7 +12,8 @@ class MetadataApiClient:
 
         try:
             response = log_duration(
-                lambda: requests.get(get_version_url), "metadata_get_version_duration",
+                lambda: requests.get(get_version_url),
+                "metadata_get_version_duration",
             )
         except RequestException as e:
             log_exception(e)
@@ -32,7 +33,8 @@ class MetadataApiClient:
 
         get_dataset_url = f"{self.url}/datasets/{dataset_id}"
         response = log_duration(
-            lambda: requests.get(get_dataset_url), "metadata_get_version_duration",
+            lambda: requests.get(get_dataset_url),
+            "metadata_get_version_duration",
         )
         response.raise_for_status()
 
