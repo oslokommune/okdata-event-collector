@@ -56,7 +56,7 @@ custom:
     dockerizePip: non-linux
     usePoetry: false
   esLogs:
-    endpoint: ${ssm:/dataplatform/shared/elasticsearch-endpoint}
+    endpoint: ${ssm:/dataplatform/shared/logs-elasticsearch-endpoint}
     index: dataplatform-services
     filterPattern: '{ $.function_name = "*" }'
   documentation: ${file(serverless/documentation/documentation.yml)}
