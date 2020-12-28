@@ -5,10 +5,11 @@ events:
   - http:
       path: webhook/event/{dataset_id}/{version}
       method: post
-      parameters:
-        paths:
-          dataset_id: true
-          version: true
-        querystrings:
-          token: true
+      request:
+        parameters:
+          paths:
+            dataset_id: true
+            version: true
+          querystrings:
+            token: true
       documentation: ${file(serverless/documentation/post-event-webhook-auth.yml)}

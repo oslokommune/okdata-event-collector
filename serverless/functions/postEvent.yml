@@ -5,10 +5,11 @@ events:
   - http:
       path: event/{datasetId}/{version}
       method: post
-      parameters:
-        paths:
-          datasetId: true
-          version: true
+      request:
+        parameters:
+          paths:
+            datasetId: true
+            version: true
       documentation: ${file(serverless/documentation/postEvent.yml)}
       authorizer:
         arn: ${self:custom.keycloakArn.${self:provider.stage}, self:custom.keycloakArn.dev}
