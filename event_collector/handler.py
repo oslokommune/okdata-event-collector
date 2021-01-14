@@ -8,8 +8,7 @@ from boto3.dynamodb.conditions import Key
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
 
-from auth import SimpleAuth
-from dataplatform.awslambda.logging import (
+from okdata.aws.logging import (
     logging_wrapper,
     log_add,
     log_duration,
@@ -23,6 +22,7 @@ from event_collector.handler_responses import (
     ok_response,
 )
 from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
+from event_collector.auth import is_dataset_owner, webhook_token_is_authorized
 
 
 post_events_request_schema = None
@@ -58,7 +58,7 @@ def post_events(event, context, retries=3):
     log_add(enable_auth=ENABLE_AUTH)
     if ENABLE_AUTH:
         access_token = event["headers"]["Authorization"].split(" ")[-1]
-        is_owner = SimpleAuth().is_authorized(access_token, dataset_id)
+        is_owner = is_dataset_owner(access_token, dataset_id)
         log_add(is_owner=is_owner)
         if not is_owner:
             return error_response(403, "Forbidden")
@@ -85,9 +85,7 @@ def events_webhook(event, context, retries=3):
     except ServerErrorException:
         return error_response(500, "Internal server error")
 
-    has_access, forbidden_msg = SimpleAuth().webhook_token_is_authorized(
-        webhook_token, dataset_id
-    )
+    has_access, forbidden_msg = webhook_token_is_authorized(webhook_token, dataset_id)
 
     if not has_access:
         return {"statusCode": 403, "body": json.dumps({"message": forbidden_msg})}

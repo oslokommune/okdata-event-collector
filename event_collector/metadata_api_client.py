@@ -1,5 +1,5 @@
 import requests
-from dataplatform.awslambda.logging import log_add, log_exception, log_duration
+from okdata.aws.logging import log_add, log_exception, log_duration
 from requests.exceptions import RequestException
 
 

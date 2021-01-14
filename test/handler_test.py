@@ -1,6 +1,5 @@
 import pytest
 import json
-from auth import SimpleAuth
 import event_collector.handler as handler
 import test.test_data.event_to_record_data as event_to_record_data
 import test.test_data.get_failed_records_data as get_failed_records_data
@@ -8,8 +7,6 @@ import test.test_data.post_event_data as post_event_data
 import test.test_data.extract_event_body_test_data as extract_event_body_test_data
 from test.test_utils import create_event_stream, create_event_streams_table
 from moto import mock_kinesis, mock_dynamodb2
-
-
 from aws_xray_sdk.core import xray_recorder
 
 xray_recorder.begin_segment("Test")
@@ -189,20 +186,20 @@ def metadata_api(requests_mock):
 
 @pytest.fixture()
 def simple_auth(monkeypatch):
-    def webhook_is_authorized_response(self, webhook_token, dataset_id):
+    def webhook_is_authorized_response(webhook_token, dataset_id):
         if webhook_token == post_event_data.webhook_token_access_denied:
             return False, "Forbidden"
         return True
 
-    def is_authorized_response(self, access_token, dataset_id):
+    def is_authorized_response(access_token, dataset_id):
         if access_token == post_event_data.access_token_access_denied:
             return False
         return True
 
     monkeypatch.setattr(
-        SimpleAuth, "webhook_token_is_authorized", webhook_is_authorized_response
+        handler, "webhook_token_is_authorized", webhook_is_authorized_response
     )
-    monkeypatch.setattr(SimpleAuth, "is_authorized", is_authorized_response)
+    monkeypatch.setattr(handler, "is_dataset_owner", is_authorized_response)
 
 
 @pytest.fixture()

@@ -14,5 +14,12 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.oslo.kommune.no/origo-dataplatform/event-collector",
     packages=setuptools.find_packages(),
-    install_requires=["jsonschema"],
+    install_requires=[
+        "boto3",
+        "aws-xray-sdk",
+        "requests",
+        "jsonschema",
+        "python-keycloak",
+        "okdata-aws",
+    ],
 )
