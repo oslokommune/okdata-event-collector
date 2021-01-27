@@ -1,6 +1,4 @@
 handler: event_collector/handler.events_webhook
-layers:
-  - ${ssm:/dataplatform/shared/python-base-layer-arn}
 events:
   - http:
       path: webhook/events/{dataset_id}/{version}
