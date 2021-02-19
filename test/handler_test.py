@@ -172,7 +172,7 @@ def metadata_api(requests_mock):
     requests_mock.register_uri(
         "GET",
         f"{handler.metadata_api_client.url}/datasets/{post_event_data.dataset_id}",
-        text=json.dumps({"confidentiality": post_event_data.confidentiality}),
+        text=json.dumps({"accessRights": post_event_data.access_rights}),
         status_code=200,
     )
 

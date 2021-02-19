@@ -2,6 +2,7 @@ import json
 
 dataset_id = "d123"
 version = "1"
+access_rights = "public"
 confidentiality = "green"
 stream_name = f"dp.{confidentiality}.{dataset_id}.incoming.{version}.json"
 stream_name_raw = f"dp.{confidentiality}.{dataset_id}.raw.{version}.json"

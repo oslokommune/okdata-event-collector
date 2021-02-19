@@ -2,6 +2,12 @@ import requests
 from okdata.aws.logging import log_add, log_exception, log_duration
 from requests.exceptions import RequestException
 
+CONFIDENTIALITY_MAP = {
+    "public": "green",
+    "restricted": "yellow",
+    "non-public": "red",
+}
+
 
 class MetadataApiClient:
     def __init__(self, metadata_api_url):
@@ -38,7 +44,7 @@ class MetadataApiClient:
         )
         response.raise_for_status()
 
-        return response.json()["confidentiality"]
+        return CONFIDENTIALITY_MAP[response.json()["accessRights"]]
 
 
 class ServerErrorException(Exception):
