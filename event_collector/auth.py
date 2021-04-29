@@ -8,16 +8,6 @@ KEYCLOAK_REALM = os.environ["KEYCLOAK_REALM"]
 CLIENT_SECRET = os.environ["CLIENT_SECRET"]
 
 
-def is_dataset_owner(token, dataset_id):
-    result = requests.get(
-        f"{AUTHORIZER_API}/{dataset_id}",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-    result.raise_for_status()
-    data = result.json()
-    return data.get("access", False)
-
-
 def webhook_token_is_authorized(webhook_token, dataset_id):
     client = KeycloakOpenID(
         server_url=KEYCLOAK_SERVER,

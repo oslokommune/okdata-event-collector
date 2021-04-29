@@ -1,9 +1,10 @@
+import json
 import os
 import uuid
-import json
 from json.decoder import JSONDecodeError
-from aws_xray_sdk.core import patch_all, xray_recorder
+
 import boto3
+from aws_xray_sdk.core import patch_all, xray_recorder
 from boto3.dynamodb.conditions import Key
 from botocore.client import ClientError
 from jsonschema import validate, ValidationError
@@ -14,6 +15,7 @@ from okdata.aws.logging import (
     log_duration,
     log_exception,
 )
+from okdata.resource_auth import ResourceAuthorizer
 
 from event_collector.handler_responses import (
     error_response,
@@ -22,13 +24,14 @@ from event_collector.handler_responses import (
     ok_response,
 )
 from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
-from event_collector.auth import is_dataset_owner, webhook_token_is_authorized
+from event_collector.auth import webhook_token_is_authorized
 
 
 post_events_request_schema = None
 
 metadata_api_url = os.environ["METADATA_API_URL"]
 metadata_api_client = MetadataApiClient(metadata_api_url)
+resource_authorizer = ResourceAuthorizer()
 
 dynamodb = None
 event_webhook_table = None
@@ -58,9 +61,13 @@ def post_events(event, context, retries=3):
     log_add(enable_auth=ENABLE_AUTH)
     if ENABLE_AUTH:
         access_token = event["headers"]["Authorization"].split(" ")[-1]
-        is_owner = is_dataset_owner(access_token, dataset_id)
-        log_add(is_owner=is_owner)
-        if not is_owner:
+        has_access = resource_authorizer.has_access(
+            access_token,
+            scope="okdata:dataset:write",
+            resource_name=f"okdata:dataset:{dataset_id}",
+        )
+        log_add(has_access=has_access)
+        if not has_access:
             return error_response(403, "Forbidden")
 
     event_body, validation_error_msg = validate_event_body(event)
