@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="event-collectorr",
+    name="event-collector",
     version="0.0.1",
     author="Origo Dataplattform",
     author_email="dataplattform@oslo.kommune.no",
