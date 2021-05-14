@@ -12,7 +12,7 @@ setuptools.setup(
     description="Code for putting data on a data stream",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.oslo.kommune.no/origo-dataplatform/event-collector",
+    url="https://github.com/oslokommune/event-collector/",
     packages=setuptools.find_packages(),
     install_requires=[
         "boto3",
