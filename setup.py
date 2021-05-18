@@ -5,14 +5,14 @@ with open("README.md", "r") as fh:
 
 
 setuptools.setup(
-    name="event-collector",
+    name="okdata-event-collector",
     version="0.0.1",
     author="Origo Dataplattform",
     author_email="dataplattform@oslo.kommune.no",
     description="Code for putting data on a data stream",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/oslokommune/event-collector/",
+    url="https://github.com/oslokommune/okdata-event-collector/",
     packages=setuptools.find_packages(),
     install_requires=[
         "boto3",
