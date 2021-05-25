@@ -39,10 +39,6 @@ okdata_config = Config()
 okdata_config.config["cacheCredentials"] = False
 webhook_client = WebhookClient(okdata_config)
 
-dynamodb = None
-event_webhook_table = None
-webhooks_cache = {}  # Cache webhook config for lifetime of Lambda
-
 ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
 
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
