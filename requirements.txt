@@ -37,10 +37,10 @@ okdata-aws==0.3.2
     # via okdata-event-collector (setup.py)
 okdata-resource-auth==0.1.0
     # via okdata-event-collector (setup.py)
-okdata-sdk==0.7.0
-    # via okdata-aws
-prettytable==2.1.0
-    # via okdata-sdk
+okdata-sdk==0.8.2
+    # via
+    #   okdata-aws
+    #   okdata-event-collector (setup.py)
 pyasn1==0.4.8
     # via
     #   python-jose
@@ -84,8 +84,6 @@ urllib3==1.26.4
     #   botocore
     #   okdata-sdk
     #   requests
-wcwidth==0.2.5
-    # via prettytable
 wrapt==1.12.1
     # via aws-xray-sdk
 

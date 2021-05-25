@@ -22,5 +22,6 @@ setuptools.setup(
         "python-keycloak",
         "okdata-aws",
         "okdata-resource-auth",
+        "okdata-sdk >= 0.8.2",
     ],
 )

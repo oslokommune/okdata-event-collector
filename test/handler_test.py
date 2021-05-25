@@ -5,6 +5,7 @@ from aws_xray_sdk.core import xray_recorder
 from moto import mock_kinesis, mock_dynamodb2
 
 from okdata.resource_auth import ResourceAuthorizer
+from okdata.sdk.webhook.client import WebhookClient
 
 import event_collector.handler as handler
 import test.test_data.event_to_record_data as event_to_record_data
@@ -190,10 +191,10 @@ def metadata_api(requests_mock):
 
 @pytest.fixture()
 def mock_auth(monkeypatch):
-    def webhook_is_authorized_response(webhook_token, dataset_id):
-        if webhook_token == post_event_data.webhook_token_access_denied:
-            return False, "Forbidden"
-        return True
+    def authorize_webhook_token(self, dataset_id, token, retries):
+        if token == post_event_data.webhook_token_access_denied:
+            return {"access": False, "reason": "Forbidden"}
+        return {"access": True, "reason": None}
 
     def is_authorized_response(self, access_token, scope, resource_name):
         if (
@@ -205,7 +206,7 @@ def mock_auth(monkeypatch):
         return False
 
     monkeypatch.setattr(
-        handler, "webhook_token_is_authorized", webhook_is_authorized_response
+        WebhookClient, "authorize_webhook_token", authorize_webhook_token
     )
     monkeypatch.setattr(ResourceAuthorizer, "has_access", is_authorized_response)
 
