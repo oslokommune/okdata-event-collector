@@ -150,6 +150,8 @@ def get_event_stream(event_stream_id):
         current_item = max(event_stream_items, key=lambda item: item["config_version"])
         return current_item
 
+    return None
+
 
 def identify_stream_name(dataset_id, version, confidentiality):
     stage = "incoming"
