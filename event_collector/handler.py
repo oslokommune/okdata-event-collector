@@ -39,8 +39,6 @@ okdata_config = Config()
 okdata_config.config["cacheCredentials"] = False
 webhook_client = WebhookClient(okdata_config)
 
-ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
-
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
 
@@ -60,17 +58,15 @@ def post_events(event, context, retries=3):
     except ServerErrorException:
         return error_response(500, "Internal server error")
 
-    log_add(enable_auth=ENABLE_AUTH)
-    if ENABLE_AUTH:
-        access_token = event["headers"]["Authorization"].split(" ")[-1]
-        has_access = resource_authorizer.has_access(
-            access_token,
-            scope="okdata:dataset:write",
-            resource_name=f"okdata:dataset:{dataset_id}",
-        )
-        log_add(has_access=has_access)
-        if not has_access:
-            return error_response(403, "Forbidden")
+    access_token = event["headers"]["Authorization"].split(" ")[-1]
+    has_access = resource_authorizer.has_access(
+        access_token,
+        scope="okdata:dataset:write",
+        resource_name=f"okdata:dataset:{dataset_id}",
+    )
+    log_add(has_access=has_access)
+    if not has_access:
+        return error_response(403, "Forbidden")
 
     event_body, validation_error_msg = validate_event_body(event)
 
