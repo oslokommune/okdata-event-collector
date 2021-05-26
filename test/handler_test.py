@@ -191,8 +191,8 @@ def metadata_api(requests_mock):
 
 @pytest.fixture()
 def mock_auth(monkeypatch):
-    def authorize_webhook_token(self, dataset_id, token, retries):
-        if token == post_event_data.webhook_token_access_denied:
+    def authorize_webhook_token(self, dataset_id, token, operation, retries):
+        if token == post_event_data.webhook_token_access_denied or operation != "write":
             return {"access": False, "reason": "Forbidden"}
         return {"access": True, "reason": None}
 

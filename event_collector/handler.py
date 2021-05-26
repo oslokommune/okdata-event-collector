@@ -91,7 +91,7 @@ def events_webhook(event, context, retries=3):
         return error_response(500, "Internal server error")
 
     webhook_auth_response = webhook_client.authorize_webhook_token(
-        dataset_id, webhook_token, retries=3
+        dataset_id, webhook_token, "write", retries=3
     )
 
     if not webhook_auth_response["access"]:
