@@ -21,12 +21,12 @@ provider:
     GIT_REV: ${git:branch}:${git:sha1}
     METADATA_API_URL: ${ssm:/dataplatform/shared/api-gateway-url}/metadata
     AUTHORIZER_API: ${ssm:/dataplatform/shared/api-gateway-url}/simple-dataset-authorizer
-    ENABLE_AUTH: true
     KEYCLOAK_SERVER: ${ssm:/dataplatform/shared/keycloak-server-url}
     KEYCLOAK_REALM: api-catalog
     RESOURCE_SERVER_CLIENT_ID: "okdata-resource-server"
-    CLIENT_ID: event-collector
-    CLIENT_SECRET: ${ssm:/dataplatform/${self:service.name}/keycloak-client-secret~true}
+    OKDATA_CLIENT_ID: event-collector
+    OKDATA_CLIENT_SECRET: ${ssm:/dataplatform/${self:service.name}/keycloak-client-secret~true}
+    OKDATA_ENVIRONMENT: ${self:provider.stage}
     SERVICE_NAME: ${self:service}
   rolePermissionsBoundary: "arn:aws:iam::#{AWS::AccountId}:policy/oslokommune/oslokommune-boundary"
   iamManagedPolicies:

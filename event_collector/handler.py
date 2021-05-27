@@ -16,6 +16,8 @@ from okdata.aws.logging import (
     log_exception,
 )
 from okdata.resource_auth import ResourceAuthorizer
+from okdata.sdk.config import Config
+from okdata.sdk.webhook.client import WebhookClient
 
 from event_collector.handler_responses import (
     error_response,
@@ -24,7 +26,6 @@ from event_collector.handler_responses import (
     ok_response,
 )
 from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
-from event_collector.auth import webhook_token_is_authorized
 
 
 post_events_request_schema = None
@@ -33,11 +34,10 @@ metadata_api_url = os.environ["METADATA_API_URL"]
 metadata_api_client = MetadataApiClient(metadata_api_url)
 resource_authorizer = ResourceAuthorizer()
 
-dynamodb = None
-event_webhook_table = None
-webhooks_cache = {}  # Cache webhook config for lifetime of Lambda
-
-ENABLE_AUTH = os.environ.get("ENABLE_AUTH", "false") == "true"
+okdata_config = Config()
+# Ensure that the sdk will not try to cache credentials on file
+okdata_config.config["cacheCredentials"] = False
+webhook_client = WebhookClient(okdata_config)
 
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
@@ -58,17 +58,15 @@ def post_events(event, context, retries=3):
     except ServerErrorException:
         return error_response(500, "Internal server error")
 
-    log_add(enable_auth=ENABLE_AUTH)
-    if ENABLE_AUTH:
-        access_token = event["headers"]["Authorization"].split(" ")[-1]
-        has_access = resource_authorizer.has_access(
-            access_token,
-            scope="okdata:dataset:write",
-            resource_name=f"okdata:dataset:{dataset_id}",
-        )
-        log_add(has_access=has_access)
-        if not has_access:
-            return error_response(403, "Forbidden")
+    access_token = event["headers"]["Authorization"].split(" ")[-1]
+    has_access = resource_authorizer.has_access(
+        access_token,
+        scope="okdata:dataset:write",
+        resource_name=f"okdata:dataset:{dataset_id}",
+    )
+    log_add(has_access=has_access)
+    if not has_access:
+        return error_response(403, "Forbidden")
 
     event_body, validation_error_msg = validate_event_body(event)
 
@@ -92,10 +90,15 @@ def events_webhook(event, context, retries=3):
     except ServerErrorException:
         return error_response(500, "Internal server error")
 
-    has_access, forbidden_msg = webhook_token_is_authorized(webhook_token, dataset_id)
+    webhook_auth_response = webhook_client.authorize_webhook_token(
+        dataset_id, webhook_token, "write", retries=3
+    )
 
-    if not has_access:
-        return {"statusCode": 403, "body": json.dumps({"message": forbidden_msg})}
+    if not webhook_auth_response["access"]:
+        return {
+            "statusCode": 403,
+            "body": json.dumps({"message": webhook_auth_response["reason"]}),
+        }
 
     event_body, validation_error_msg = validate_event_body(event)
 
