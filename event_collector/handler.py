@@ -59,10 +59,13 @@ def post_events(event, context, retries=3):
         return error_response(500, "Internal server error")
 
     access_token = event["headers"]["Authorization"].split(" ")[-1]
-    has_access = resource_authorizer.has_access(
-        access_token,
-        scope="okdata:dataset:write",
-        resource_name=f"okdata:dataset:{dataset_id}",
+    has_access = log_duration(
+        lambda: resource_authorizer.has_access(
+            access_token,
+            scope="okdata:dataset:write",
+            resource_name=f"okdata:dataset:{dataset_id}",
+        ),
+        "resource_authorizer_has_access_duration",
     )
     log_add(has_access=has_access)
     if not has_access:
@@ -90,8 +93,11 @@ def events_webhook(event, context, retries=3):
     except ServerErrorException:
         return error_response(500, "Internal server error")
 
-    webhook_auth_response = webhook_client.authorize_webhook_token(
-        dataset_id, webhook_token, "write", retries=3
+    webhook_auth_response = log_duration(
+        lambda: webhook_client.authorize_webhook_token(
+            dataset_id, webhook_token, "write", retries=3
+        ),
+        "authorize_webhook_token_duration",
     )
 
     if not webhook_auth_response["access"]:
