@@ -4,13 +4,13 @@
 #
 #    pip-compile
 #
-attrs==20.3.0
+attrs==21.2.0
     # via jsonschema
-aws-xray-sdk==2.7.0
+aws-xray-sdk==2.8.0
     # via okdata-event-collector (setup.py)
-boto3==1.17.54
+boto3==1.17.83
     # via okdata-event-collector (setup.py)
-botocore==1.20.54
+botocore==1.20.83
     # via
     #   aws-xray-sdk
     #   boto3
@@ -25,8 +25,6 @@ future==0.18.2
     # via aws-xray-sdk
 idna==2.10
     # via requests
-importlib-metadata==4.0.1
-    # via jsonschema
 jmespath==0.10.0
     # via
     #   boto3
@@ -35,9 +33,9 @@ jsonschema==3.2.0
     # via
     #   okdata-event-collector (setup.py)
     #   okdata-sdk
-okdata-aws==0.3.2
+okdata-aws==0.3.3
     # via okdata-event-collector (setup.py)
-okdata-resource-auth==0.1.0
+okdata-resource-auth==0.1.1
     # via okdata-event-collector (setup.py)
 okdata-sdk==0.9.0
     # via
@@ -49,7 +47,7 @@ pyasn1==0.4.8
     #   rsa
 pydantic==1.8.2
     # via okdata-aws
-pyjwt==2.0.1
+pyjwt==2.1.0
     # via okdata-sdk
 pyrsistent==0.17.3
     # via jsonschema
@@ -69,9 +67,9 @@ requests==2.25.1
     #   python-keycloak
 rsa==4.7.2
     # via python-jose
-s3transfer==0.4.0
+s3transfer==0.4.2
     # via boto3
-six==1.15.0
+six==1.16.0
     # via
     #   ecdsa
     #   jsonschema
@@ -79,11 +77,8 @@ six==1.15.0
     #   python-jose
 structlog==21.1.0
     # via okdata-aws
-typing-extensions==3.7.4.3
-    # via
-    #   importlib-metadata
-    #   pydantic
-    #   structlog
+typing-extensions==3.10.0.0
+    # via pydantic
 urllib3==1.26.5
     # via
     #   botocore
@@ -91,8 +86,6 @@ urllib3==1.26.5
     #   requests
 wrapt==1.12.1
     # via aws-xray-sdk
-zipp==3.4.1
-    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
