@@ -40,7 +40,7 @@ class MetadataApiClient:
         get_dataset_url = f"{self.url}/datasets/{dataset_id}"
         response = log_duration(
             lambda: requests.get(get_dataset_url),
-            "metadata_get_version_duration",
+            "metadata_get_confidentiality_duration",
         )
         response.raise_for_status()
 
