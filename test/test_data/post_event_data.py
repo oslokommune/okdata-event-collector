@@ -13,14 +13,6 @@ access_token_access_denied = "access-token-denied"
 webhook_token_access_denied = "webhook-token-access-denied"
 
 
-get_dataset_versions_route = f"datasets/{dataset_id}/versions/{version}"
-get_dataset_versions_not_exist_route = (
-    f"datasets/{dataset_id_not_found}/versions/{version}"
-)
-get_dataset_versions_route_server_error = (
-    f"datasets/{dataset_id_server_error}/versions/{version}"
-)
-
 event_with_list = {
     "pathParameters": {"datasetId": dataset_id, "version": version},
     "body": json.dumps(

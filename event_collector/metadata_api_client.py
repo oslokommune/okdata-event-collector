@@ -13,38 +13,40 @@ class MetadataApiClient:
     def __init__(self, metadata_api_url):
         self.url = metadata_api_url
 
-    def version_exists(self, dataset_id, version):
-        get_version_url = f"{self.url}/datasets/{dataset_id}/versions/{version}"
+    def get_dataset_and_versions(self, dataset_id):
+        dataset_url = f"{self.url}/datasets/{dataset_id}?embed=versions"
 
         try:
             response = log_duration(
-                lambda: requests.get(get_version_url),
-                "metadata_get_version_duration",
+                lambda: requests.get(dataset_url),
+                "metadata_get_dataset_duration",
             )
         except RequestException as e:
             log_exception(e)
             raise ServerErrorException
 
         if response.status_code == 200:
-            return True
+            return response.json()
 
         if response.status_code == 404:
-            return False
+            return None
         else:
             log_add(metadata_api_response_status_code=response.status_code)
             log_add(metadata_api_response_body=response.json())
             raise ServerErrorException
 
-    def get_confidentiality(self, dataset_id):
 
-        get_dataset_url = f"{self.url}/datasets/{dataset_id}"
-        response = log_duration(
-            lambda: requests.get(get_dataset_url),
-            "metadata_get_confidentiality_duration",
-        )
-        response.raise_for_status()
+def version_exists(dataset, version):
+    if dataset and version:
+        embedded = dataset.get("_embedded", {})
+        versions = [v["version"] for v in embedded.get("versions", [])]
+        return version in versions
+    else:
+        return False
 
-        return CONFIDENTIALITY_MAP[response.json()["accessRights"]]
+
+def get_confidentiality(dataset):
+    return CONFIDENTIALITY_MAP[dataset["accessRights"]]
 
 
 class ServerErrorException(Exception):
