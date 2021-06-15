@@ -25,7 +25,7 @@ from event_collector.handler_responses import (
     failed_elements_response,
     ok_response,
 )
-from event_collector.metadata_api_client import (
+from event_collector.metadata import (
     MetadataApiClient,
     ServerErrorException,
     version_exists,
