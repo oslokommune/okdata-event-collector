@@ -25,7 +25,12 @@ from event_collector.handler_responses import (
     failed_elements_response,
     ok_response,
 )
-from event_collector.metadata_api_client import MetadataApiClient, ServerErrorException
+from event_collector.metadata import (
+    MetadataApiClient,
+    ServerErrorException,
+    version_exists,
+    get_confidentiality,
+)
 
 
 post_events_request_schema = None
@@ -53,7 +58,8 @@ def post_events(event, context, retries=3):
     log_add(dataset_id=dataset_id, version=version)
 
     try:
-        if not metadata_api_client.version_exists(dataset_id, version):
+        dataset = metadata_api_client.get_dataset_and_versions(dataset_id)
+        if not version_exists(dataset, version):
             return not_found_response(dataset_id, version)
     except ServerErrorException:
         return error_response(500, "Internal server error")
@@ -76,7 +82,7 @@ def post_events(event, context, retries=3):
     if validation_error_msg:
         return error_response(400, validation_error_msg)
 
-    return send_events(dataset_id, version, event_body, retries)
+    return send_events(dataset, version, event_body, retries)
 
 
 @logging_wrapper
@@ -88,7 +94,8 @@ def events_webhook(event, context, retries=3):
     log_add(dataset_id=dataset_id, version=version)
 
     try:
-        if not metadata_api_client.version_exists(dataset_id, version):
+        dataset = metadata_api_client.get_dataset_and_versions(dataset_id)
+        if not version_exists(dataset, version):
             return not_found_response(dataset_id, version)
     except ServerErrorException:
         return error_response(500, "Internal server error")
@@ -111,14 +118,14 @@ def events_webhook(event, context, retries=3):
     if validation_error_msg:
         return error_response(400, validation_error_msg)
 
-    return send_events(dataset_id, version, event_body, retries)
+    return send_events(dataset, version, event_body, retries)
 
 
-def send_events(dataset_id, version, events, retries=3):
+def send_events(dataset, version, events, retries=3):
     log_add(num_events=len(events))
 
-    confidentiality = metadata_api_client.get_confidentiality(dataset_id)
-    stream_name = identify_stream_name(dataset_id, version, confidentiality)
+    confidentiality = get_confidentiality(dataset)
+    stream_name = identify_stream_name(dataset["Id"], version, confidentiality)
     log_add(confidentiality=confidentiality, stream_name=stream_name)
 
     try:

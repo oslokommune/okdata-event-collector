@@ -160,30 +160,30 @@ def test_stream_name_identification(mock_dynamodb):
 
 @pytest.fixture()
 def metadata_api(requests_mock):
+
     requests_mock.register_uri(
         "GET",
-        f"{handler.metadata_api_client.url}/{post_event_data.get_dataset_versions_route}",
-        text=json.dumps([{"version": "1"}]),
+        f"{handler.metadata_api_client.url}/datasets/{post_event_data.dataset_id}",
+        text=json.dumps(
+            {
+                "Id": post_event_data.dataset_id,
+                "accessRights": post_event_data.access_rights,
+                "_embedded": {"versions": [{"version": post_event_data.version}]},
+            }
+        ),
         status_code=200,
     )
 
     requests_mock.register_uri(
         "GET",
-        f"{handler.metadata_api_client.url}/{post_event_data.get_dataset_versions_not_exist_route}",
+        f"{handler.metadata_api_client.url}/datasets/{post_event_data.dataset_id_not_found}",
         text=json.dumps({"message": "Not Found"}),
         status_code=404,
     )
 
     requests_mock.register_uri(
         "GET",
-        f"{handler.metadata_api_client.url}/datasets/{post_event_data.dataset_id}",
-        text=json.dumps({"accessRights": post_event_data.access_rights}),
-        status_code=200,
-    )
-
-    requests_mock.register_uri(
-        "GET",
-        f"{handler.metadata_api_client.url}/{post_event_data.get_dataset_versions_route_server_error}",
+        f"{handler.metadata_api_client.url}/datasets/{post_event_data.dataset_id_server_error}",
         text=json.dumps({"message": "Server Error"}),
         status_code=500,
     )
