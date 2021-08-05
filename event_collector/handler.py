@@ -7,14 +7,14 @@ import boto3
 from aws_xray_sdk.core import patch_all, xray_recorder
 from boto3.dynamodb.conditions import Key
 from botocore.client import ClientError
+from datetime import datetime
 from jsonschema import validate, ValidationError
 
-from okdata.aws.logging import (
-    logging_wrapper,
-    log_add,
-    log_duration,
-    log_exception,
-)
+from okdata.aws.logging import logging_wrapper
+from okdata.aws.logging import log_add as _log_add
+from okdata.aws.logging import log_duration as _log_duration
+from okdata.aws.logging import log_exception as _log_exception
+
 from okdata.resource_auth import ResourceAuthorizer
 from okdata.sdk.config import Config
 from okdata.sdk.webhook.client import WebhookClient
@@ -48,6 +48,25 @@ with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
 
 patch_all()
+
+
+def log_add(**kwargs):
+    print(f"Adding log fields: {kwargs}")
+    _log_add(**kwargs)
+
+
+def log_duration(f, duration_field):
+    start = datetime.now()
+    print(f"Start time for {duration_field}: {start}")
+    result = _log_duration(f, duration_field)
+    end = datetime.now()
+    print(f"End time for {duration_field}: {end}")
+    return result
+
+
+def log_exception(e):
+    print(f"Exception: {e}")
+    _log_exception(e)
 
 
 @logging_wrapper
@@ -171,7 +190,10 @@ def get_event_stream(event_stream_id):
 
 def identify_stream_name(dataset_id, version, confidentiality):
     stage = "incoming"
-    event_stream = get_event_stream(f"{dataset_id}/{version}")
+    event_stream = log_duration(
+        lambda: get_event_stream(f"{dataset_id}/{version}"),
+        "get_event_stream_duration",
+    )
 
     if event_stream:
         stage = "raw"

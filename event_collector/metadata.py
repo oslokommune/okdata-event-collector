@@ -1,5 +1,9 @@
 import requests
-from okdata.aws.logging import log_add, log_exception, log_duration
+from datetime import datetime
+
+from okdata.aws.logging import log_add as _log_add
+from okdata.aws.logging import log_duration as _log_duration
+from okdata.aws.logging import log_exception as _log_exception
 from requests.exceptions import RequestException
 
 CONFIDENTIALITY_MAP = {
@@ -7,6 +11,25 @@ CONFIDENTIALITY_MAP = {
     "restricted": "yellow",
     "non-public": "red",
 }
+
+
+def log_add(**kwargs):
+    print(f"Adding log fields: {kwargs}")
+    _log_add(**kwargs)
+
+
+def log_duration(f, duration_field):
+    start = datetime.now()
+    print(f"Start time for {duration_field}: {start}")
+    result = _log_duration(f, duration_field)
+    end = datetime.now()
+    print(f"End time for {duration_field}: {end}")
+    return result
+
+
+def log_exception(e):
+    print(f"Exception: {e}")
+    _log_exception(e)
 
 
 class MetadataApiClient:
