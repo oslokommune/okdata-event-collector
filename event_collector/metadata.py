@@ -1,6 +1,6 @@
-import requests
 from datetime import datetime
 
+import requests
 from okdata.aws.logging import log_add as _log_add
 from okdata.aws.logging import log_duration as _log_duration
 from okdata.aws.logging import log_exception as _log_exception

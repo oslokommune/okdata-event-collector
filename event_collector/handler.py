@@ -1,20 +1,18 @@
 import json
 import os
 import uuid
+from datetime import datetime
 from json.decoder import JSONDecodeError
 
 import boto3
 from aws_xray_sdk.core import patch_all, xray_recorder
 from boto3.dynamodb.conditions import Key
 from botocore.client import ClientError
-from datetime import datetime
 from jsonschema import validate, ValidationError
-
 from okdata.aws.logging import logging_wrapper
 from okdata.aws.logging import log_add as _log_add
 from okdata.aws.logging import log_duration as _log_duration
 from okdata.aws.logging import log_exception as _log_exception
-
 from okdata.resource_auth import ResourceAuthorizer
 from okdata.sdk.config import Config
 from okdata.sdk.webhook.client import WebhookClient
