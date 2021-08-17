@@ -21,7 +21,7 @@ setuptools.setup(
         "jsonschema",
         "python-keycloak",
         "okdata-aws",
-        "okdata-resource-auth>=0.1.1",
+        "okdata-resource-auth>=0.1.2",
         "okdata-sdk >= 0.9.0",
     ],
 )
