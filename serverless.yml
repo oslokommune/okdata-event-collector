@@ -1,10 +1,10 @@
-frameworkVersion: ">=2.10.0 <3.0.0"
+frameworkVersion: ">=2.55.0 <3.0.0"
 
 service: event-collector
 
 provider:
   name: aws
-  runtime: python3.7
+  runtime: python3.9
   region: ${opt:region, 'eu-west-1'}
   stage: ${opt:stage, 'dev'}
   timeout: 29
@@ -28,9 +28,9 @@ provider:
     OKDATA_CLIENT_SECRET: ${ssm:/dataplatform/${self:service.name}/keycloak-client-secret~true}
     OKDATA_ENVIRONMENT: ${self:provider.stage}
     SERVICE_NAME: ${self:service}
-  rolePermissionsBoundary: "arn:aws:iam::#{AWS::AccountId}:policy/oslokommune/oslokommune-boundary"
+  rolePermissionsBoundary: "arn:aws:iam::${aws:accountId}:policy/oslokommune/oslokommune-boundary"
   iamManagedPolicies:
-    - 'arn:aws:iam::#{AWS::AccountId}:policy/event-collector-policy'
+    - "arn:aws:iam::${aws:accountId}:policy/event-collector-policy"
     - 'arn:aws:iam::aws:policy/AWSXRayDaemonWriteAccess'
 
 functions:
@@ -50,7 +50,6 @@ plugins:
   - serverless-python-requirements
   - serverless-aws-documentation
   - serverless-plugin-git-variables
-  - serverless-pseudo-parameters
   - serverless-es-logs
 
 custom:
@@ -66,5 +65,5 @@ custom:
     prod: ok-origo-dataplatform-config-prod
     dev: ok-origo-dataplatform-config-dev
   keycloakArn:
-    prod: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:keycloak-authorizer-prod-authenticate
-    dev: arn:aws:lambda:#{AWS::Region}:#{AWS::AccountId}:function:keycloak-authorizer-dev-authenticate
+    prod: "arn:aws:lambda:${aws:region}:${aws:accountId}:function:keycloak-authorizer-prod-authenticate"
+    dev: "arn:aws:lambda:${aws:region}:${aws:accountId}:function:keycloak-authorizer-dev-authenticate"
