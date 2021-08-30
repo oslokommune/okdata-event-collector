@@ -5,6 +5,7 @@ from datetime import datetime
 from json.decoder import JSONDecodeError
 
 import boto3
+import botocore
 from aws_xray_sdk.core import patch_all, xray_recorder
 from boto3.dynamodb.conditions import Key
 from botocore.client import ClientError
@@ -41,6 +42,8 @@ okdata_config = Config()
 # Ensure that the sdk will not try to cache credentials on file
 okdata_config.config["cacheCredentials"] = False
 webhook_client = WebhookClient(okdata_config)
+
+retry_config = botocore.config.Config(retries={"max_attempts": 3, "mode": "standard"})
 
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
@@ -172,12 +175,14 @@ def extract_event_body(event):
 
 def get_event_stream(event_stream_id):
     table_name = "event-streams"
-    dynamodb = boto3.resource("dynamodb", region_name="eu-west-1")
+    dynamodb = boto3.resource("dynamodb", region_name="eu-west-1", config=retry_config)
     table = dynamodb.Table(table_name)
 
-    event_stream_items = table.query(
+    dynamodb_response = table.query(
         IndexName="by_id", KeyConditionExpression=Key("id").eq(event_stream_id)
-    )["Items"]
+    )
+    log_add(dynamodb_retry_attempts=dynamodb_response.get("RetryAttempts"))
+    event_stream_items = dynamodb_response["Items"]
 
     if event_stream_items:
         current_item = max(event_stream_items, key=lambda item: item["config_version"])
@@ -200,10 +205,13 @@ def identify_stream_name(dataset_id, version, confidentiality):
 
 
 def put_records_to_kinesis(record_list, stream_name, retries):
-    kinesis_client = boto3.client("kinesis", region_name="eu-west-1")
+    kinesis_client = boto3.client(
+        "kinesis", region_name="eu-west-1", config=retry_config
+    )
     put_records_response = kinesis_client.put_records(
         StreamName=stream_name, Records=record_list
     )
+    log_add(kinesis_retry_attempts=put_records_response.get("RetryAttempts"))
 
     # Applying retry-strategy: https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-sdk.html
     if put_records_response["FailedRecordCount"] > 0:
@@ -211,8 +219,10 @@ def put_records_to_kinesis(record_list, stream_name, retries):
         if retries > 0:
             return put_records_to_kinesis(failed_record_list, stream_name, retries - 1)
         else:
+            log_add(kinesis_remaining_retries=retries)
             return put_records_response, failed_record_list
     else:
+        log_add(kinesis_remaining_retries=retries)
         return put_records_response, []
 
 
