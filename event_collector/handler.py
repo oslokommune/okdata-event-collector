@@ -181,7 +181,11 @@ def get_event_stream(event_stream_id):
     dynamodb_response = table.query(
         IndexName="by_id", KeyConditionExpression=Key("id").eq(event_stream_id)
     )
-    log_add(dynamodb_retry_attempts=dynamodb_response.get("RetryAttempts"))
+    if "Error" in dynamodb_response:
+        log_add(dynamodb_error=dynamodb_response["Error"])
+    response_metadata = dynamodb_response["ResponseMetadata"]
+    log_add(dynamodb_retry_attempts=response_metadata.get("RetryAttempts"))
+
     event_stream_items = dynamodb_response["Items"]
 
     if event_stream_items:
@@ -211,7 +215,10 @@ def put_records_to_kinesis(record_list, stream_name, retries):
     put_records_response = kinesis_client.put_records(
         StreamName=stream_name, Records=record_list
     )
-    log_add(kinesis_retry_attempts=put_records_response.get("RetryAttempts"))
+    if "Error" in put_records_response:
+        log_add(kinesis_error=put_records_response["Error"])
+    response_metadata = put_records_response["ResponseMetadata"]
+    log_add(kinesis_retry_attempts=response_metadata.get("RetryAttempts"))
 
     # Applying retry-strategy: https://docs.aws.amazon.com/streams/latest/dev/developing-producers-with-sdk.html
     if put_records_response["FailedRecordCount"] > 0:
