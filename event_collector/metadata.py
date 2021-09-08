@@ -5,6 +5,7 @@ from okdata.aws.logging import log_add as _log_add
 from okdata.aws.logging import log_duration as _log_duration
 from okdata.aws.logging import log_exception as _log_exception
 from requests.exceptions import RequestException
+from simplejson.errors import JSONDecodeError
 
 CONFIDENTIALITY_MAP = {
     "public": "green",
@@ -49,7 +50,20 @@ class MetadataApiClient:
             raise ServerErrorException
 
         if response.status_code == 200:
-            return response.json()
+            try:
+                return response.json()
+            except JSONDecodeError as e:
+                # It should not happen that we get status code 200 and an empty
+                # response, but it has. Handle that case gracefully by
+                # pretending that it was a 404 and return None, but log an
+                # exception message with the dataset ID so we can investigate
+                # it further.
+                log_exception(
+                    "Got status code 200 but an invalid JSON response from {}: {}\n{}".format(
+                        dataset_url, response.text, e
+                    )
+                )
+                return None
 
         if response.status_code == 404:
             return None
