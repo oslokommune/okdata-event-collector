@@ -23,6 +23,7 @@ provider:
     AUTHORIZER_API: ${ssm:/dataplatform/shared/api-gateway-url}/simple-dataset-authorizer
     KEYCLOAK_SERVER: ${ssm:/dataplatform/shared/keycloak-server-url}
     KEYCLOAK_REALM: api-catalog
+    KEYCLOAK_TIMEOUT_MS: 3000
     RESOURCE_SERVER_CLIENT_ID: "okdata-resource-server"
     OKDATA_CLIENT_ID: event-collector
     OKDATA_CLIENT_SECRET: ${ssm:/dataplatform/${self:service.name}/keycloak-client-secret~true}
