@@ -43,7 +43,9 @@ okdata_config = Config()
 okdata_config.config["cacheCredentials"] = False
 webhook_client = WebhookClient(okdata_config)
 
-retry_config = botocore.config.Config(retries={"max_attempts": 3, "mode": "standard"})
+retry_config = botocore.config.Config(
+    connect_timeout=3, read_timeout=3, retries={"max_attempts": 3, "mode": "standard"}
+)
 
 with open("serverless/documentation/schemas/postEventsRequest.json") as f:
     post_events_request_schema = json.loads(f.read())
